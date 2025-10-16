@@ -1,0 +1,218 @@
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ocupa al menos toda la altura de la pantalla*/
+}
+
+/* Estilos para el Header*/
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #121212;
+  padding: 1rem 2rem;
+  border-bottom: 2px solid #1f1f1f;
+}
+
+.app-header .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.main-nav {
+  display: flex;
+  gap: 1.5rem; /* Espacio entre los enlaces */
+}
+
+/* Estilos para el contenido principal */
+.main-content {
+  flex-grow: 1; /* Permite que el contenido principal crezca y empuje el footer hacia abajo */
+  padding: 2rem;
+}
+
+
+.app-footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: #242424;
+  border-top: 1px solid #3a3a3a;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.saldo-display {
+  font-weight: bold;
+  background-color: #1a1a1a;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  border: 1px solid #444;
+}
+
+.logo {
+  color: #90fc86;
+  font-weight: 800;
+  font-size: 1.6rem;
+  text-decoration: none;
+  transition: transform 0.2s ease-in-out;
+}
+.logo span {
+  color: #03dac6;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+
+.saldo-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: #222;
+  padding: 0.4rem 0.8rem;
+  border-radius: 28px;
+  box-shadow: 0 0 10px rgba(144, 252, 134, 0.15);
+}
+
+.saldo-display .monedas-text {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.coin-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ffe259, #ffa751);
+  box-shadow: 0 0 8px #ffd966, inset 0 0 3px rgba(0, 0, 0, 0.35);
+  animation: brillo 2s infinite alternate;
+}
+
+.add-coins-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #03dac6, #00bfa5);
+  color: #0b0b0b;
+  border: none;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 12px rgba(3, 218, 198, 0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.add-coins-btn:hover {
+  transform: scale(1.12) rotate(10deg);
+  box-shadow: 0 8px 18px rgba(3, 218, 198, 0.22);
+}
+
+.main-nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.main-nav a {
+  color: #90fc86;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.main-nav a:hover {
+  color: #03dac6;
+}
+
+@keyframes brillo {
+  0% {
+    box-shadow: 0 0 6px #ffd966;
+  }
+  100% {
+    box-shadow: 0 0 15px #fff4a3;
+  }
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* === Botón de cierre de sesión === */
+.logout-btn {
+  background: transparent;
+  border: 1px solid #03dac6;
+  color: #03dac6;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: #03dac6;
+  color: #121212;
+  transform: scale(1.05);
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.login-btn,
+.register-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.login-btn {
+  background: linear-gradient(135deg, #03dac6, #00bfa5);
+  color: #121212;
+}
+
+.login-btn:hover {
+  box-shadow: 0 0 10px #03dac6;
+  transform: scale(1.05);
+}
+
+.register-btn {
+  background: linear-gradient(135deg, #90fc86, #00e676);
+  color: #121212;
+}
+
+
+.register-btn:hover {
+  box-shadow: 0 0 10px #90fc86;
+  transform: scale(1.05);
+}
+
+.logout-btn {
+  background: linear-gradient(135deg, #ff4e50, #f9d423);
+  border: none;
+  color: #121212;
+  font-weight: bold;
+  border-radius: 20px;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px #f9d423;
+}

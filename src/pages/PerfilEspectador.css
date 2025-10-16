@@ -1,0 +1,180 @@
+.perfil-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #2a2a2a, #121212);
+}
+
+.profile-card {
+  background: #1e1e1e;
+  border-radius: 15px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  text-align: center;
+  border: 1px solid #444;
+  color: #f5f5f5;
+  transition: transform 0.3s ease;
+}
+
+.profile-card:hover {
+  transform: translateY(-5px);
+}
+
+.profile-avatar img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 3px solid #90fc86;
+  margin-bottom: 1rem;
+  object-fit: cover;
+}
+
+.profile-name {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #90fc86;
+}
+
+.profile-stats {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.profile-stats li {
+  background-color: #333;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  border-left: 4px solid #90fc86;
+}
+
+.profile-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.profile-actions button {
+  background-color: #90fc86;
+  color: #121212;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.profile-actions button:hover {
+  background-color: #6adf63;
+  transform: scale(1.05);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #90fc86, #4de27a);
+  transition: width 0.4s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.progress-text {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #121212;
+}
+
+.level-up-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #90fc86;
+  color: #121212;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  animation: slideInOut 2.5s forwards;
+  z-index: 1000;
+}
+
+.buy-button {
+  background-color: #03dac6;
+}
+
+.buy-button:hover {
+  background-color: #01b8a2;
+}
+
+.overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  font-size: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeOut 2s forwards;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes slideInOut {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  10% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  90% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-card {
+    width: 90%;
+    padding: 1.5rem;
+  }
+
+  .profile-name {
+    font-size: 1.5rem;
+  }
+
+  .profile-actions button {
+    width: 100%;
+    font-size: 1rem;
+  }
+}
+

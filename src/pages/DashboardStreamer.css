@@ -1,0 +1,180 @@
+.dashboard-container {
+  padding: 2rem;
+  color: #f5f5f5;
+  background: linear-gradient(135deg, #121212, #1e1e1e);
+  min-height: 100vh;
+  text-align: center;
+}
+
+.dashboard-container h2 {
+  color: #90fc86;
+  margin-bottom: 1rem;
+}
+
+.dashboard-container p {
+  color: #ccc;
+  font-size: 1rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.stat-card {
+  background-color: #2a2a2a;
+  border-radius: 10px;
+  padding: 1.5rem;
+  border: 1px solid #444;
+  text-align: center;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+.stat-card-icon {
+  font-size: 2.5rem;
+}
+
+.stat-card-value {
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+  color: #90fc86;
+}
+
+.stat-card-label {
+  font-size: 1rem;
+  color: #aaa;
+}
+
+.stat-card button {
+  background-color: #90fc86;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  margin-top: 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #121212;
+  transition: background-color 0.3s ease;
+}
+
+.stat-card button:hover {
+  background-color: #6adf63;
+}
+
+.regalos-section {
+  margin-top: 3rem;
+  text-align: left;
+  max-width: 600px;
+  margin-inline: auto;
+}
+
+.regalos-section h3 {
+  color: #90fc86;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.regalos-section button {
+  background-color: #03dac6;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #121212;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  transition: background-color 0.3s ease;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.regalos-section button:hover {
+  background-color: #01b8a2;
+}
+
+.regalos-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.regalos-section li {
+  background-color: #333;
+  padding: 0.8rem 1rem;
+  border-radius: 5px;
+  margin-bottom: 0.5rem;
+  color: #f5f5f5;
+}
+
+.progress-section-streamer {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.progress-bar-streamer {
+  width: 100%;
+  height: 15px;
+  background-color: #2b2b2b;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.6);
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar-fill-streamer {
+  height: 100%;
+  background: linear-gradient(90deg, #90fc86, #4de27a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.4s ease-in-out;
+  position: relative;
+}
+
+.progress-text-streamer {
+  color: #121212;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.remaining-streamer {
+  font-size: 0.9rem;
+  color: #a0a0a0;
+}
+
+.overlay-streamer {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100%; 
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeOut 2.5s forwards;
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+@media (max-width: 600px) {
+  .stat-card-value { font-size: 1.6rem; }
+  .stat-card-icon { font-size: 2rem; }
+  .dashboard-container { padding: 1.2rem; }
+  .regalos-section { width: 90%; }
+}
