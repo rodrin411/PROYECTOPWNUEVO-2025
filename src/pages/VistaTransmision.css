@@ -1,0 +1,226 @@
+.contenedor-transmision {
+    display: flex;
+    height: calc(100vh - 60px); /* Ajuste según altura del header */
+    background-color: #0b0b0e;
+    color: white;
+}
+
+/* --- SECCIÓN PRINCIPAL (VIDEO) --- */
+.escenario-principal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto; /* Permite scroll si la pantalla es pequeña */
+}
+
+.reproductor-video {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: black;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.1); 
+}
+
+.fondo-video { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    opacity: 0.7; 
+}
+
+.indicador-vivo {
+    position: absolute;
+    top: 15px; left: 15px;
+    background: #ff0044;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.boton-reproducir {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4rem;
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.boton-reproducir:hover {
+    opacity: 1;
+}
+
+/* Barra de información debajo del video */
+.barra-info-transmision {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.perfil-streamer { 
+    display: flex; 
+    gap: 15px; 
+    align-items: center; 
+}
+
+.circulo-avatar {
+    width: 60px; height: 60px;
+    background: #00ffcc; 
+    color: black;
+    font-weight: bold;
+    font-size: 1.5rem;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.nombre-streamer { color: #aaa; margin-top: 5px; }
+.nombre-streamer strong { color: white; font-size: 1.1rem; }
+
+.verificado { 
+    background: #00ffcc; 
+    color: black; 
+    font-size: 0.7rem; 
+    padding: 2px; 
+    border-radius: 50%; 
+    margin: 0 5px;
+}
+
+.etiqueta-juego { 
+    color: #00ffcc; 
+    font-weight: bold; 
+    cursor: pointer; 
+}
+
+.boton-seguir {
+    background: white;
+    color: black;
+    border: none;
+    padding: 8px 20px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.boton-seguir:hover { background: #ddd; }
+
+.contador-vistas { margin-left: 15px; font-weight: bold; color: #efefef; }
+.acciones-transmision { display: flex; align-items: center; }
+
+/* --- BARRA LATERAL (CHAT) --- */
+.barra-lateral-chat {
+    width: 350px;
+    background: #111;
+    border-left: 1px solid #222;
+    display: flex; 
+    flex-direction: column;
+}
+
+.encabezado-chat {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #222;
+    font-weight: bold;
+    color: #00ffcc;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.caja-mensajes { 
+    flex: 1; 
+    padding: 15px; 
+    overflow-y: auto; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+}
+
+.fila-mensaje { font-size: 0.9rem; line-height: 1.4; }
+
+.fila-mensaje.propio { 
+    background: rgba(0, 255, 204, 0.05); 
+    padding: 2px 5px; 
+    border-radius: 4px; 
+}
+
+.insignia-nivel { 
+    background: #222; color: #888; 
+    padding: 1px 5px; border-radius: 3px; 
+    font-size: 0.75rem; margin-right: 6px; 
+    border: 1px solid #333;
+    font-weight: bold;
+}
+
+.autor-mensaje { font-weight: bold; margin-right: 5px; }
+.texto-mensaje { color: #ddd; }
+
+.area-input-chat { 
+    padding: 15px; 
+    background: #161616; 
+    border-top: 1px solid #222;
+}
+
+.area-input-chat input {
+    width: 100%;
+    background: #222;
+    border: 1px solid #333;
+    padding: 10px;
+    color: white;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.area-input-chat input:focus { 
+    border-color: #00ffcc; 
+}
+
+.pie-chat {
+    margin-top: 10px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+}
+
+.mis-puntos { color: #ffcc00; font-weight: bold; }
+
+.boton-regalo {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.boton-regalo:hover { transform: scale(1.1); }
+
+.alerta-nivel-flotante {
+    background: linear-gradient(90deg, #00ffcc, #00b894);
+    color: #000;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    animation: deslizarAbajo 0.5s ease-out;
+    box-shadow: 0 4px 10px rgba(0, 255, 204, 0.3);
+    border-bottom: 1px solid #000;
+}
+
+@keyframes deslizarAbajo {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fila-mensaje.propio .autor-mensaje {
+    color: #00ffcc !important; 
+}
