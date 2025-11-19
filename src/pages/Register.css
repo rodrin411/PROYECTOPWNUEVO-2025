@@ -1,0 +1,87 @@
+/* Este es el CSS para Register, es idéntico al de Login */
+/* pero usa ".register-container" */
+
+.register-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #3a0ca3, #7209b7, #f72585);
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.register-container h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+}
+
+form {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+input,
+select {
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  outline: none;
+  font-size: 1rem;
+  color: #333;
+}
+
+button {
+  padding: 12px;
+  background-color: #f72585;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #b5179e;
+}
+
+/* Para el mensaje de error */
+.error-msg {
+  color: #ffadad;
+  background-color: rgba(255, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ff5959;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* Media query */
+@media (max-width: 600px) {
+  .register-container h2 {
+    font-size: 1.5rem;
+  }
+
+  form {
+    padding: 1.5rem;
+    width: 100%;
+  }
+
+  input,
+  select,
+  button {
+    font-size: 0.9rem;
+  }
+}

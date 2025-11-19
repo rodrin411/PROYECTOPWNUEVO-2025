@@ -1,37 +1,50 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import "./PerfilEspectador.css";
 
 function PerfilEspectador() {
-  const { usuario } = useOutletContext(); 
+  // 1. Obtén 'setUsuario' además de 'usuario'
+  const { usuario, setUsuario } = useOutletContext(); 
   const navigate = useNavigate();
 
-  // Estados locales 
-  const [nivel, setNivel] = useState(usuario.nivel || 1);
-  const [puntos, setPuntos] = useState(usuario.puntos || 0);
-  const [monedas, setMonedas] = useState(usuario.monedas || 100);
+  // 2. Elimina los useState para nivel, puntos y monedas.
+  //    Solo mantén el estado para la notificación, que SÍ es local.
   const [nivelSubido, setNivelSubido] = useState(false);
 
-  // Sistema de niveles
-  const puntosPorNivel = nivel * 10; 
+  // 3. Lee los valores directamente del 'usuario' del contexto
+  const nivel = usuario.nivel || 1;
+  const puntos = usuario.puntos || 0;
+  const monedas = usuario.monedas || 0;
+
+  // Sistema de niveles (calculado con los datos del contexto)
+  const puntosPorNivel = nivel * 10;
   const progreso = Math.min((puntos / puntosPorNivel) * 100, 100);
   const puntosRestantes = Math.max(puntosPorNivel - puntos, 0);
 
-  // Función para simular envío de mensaje
+  // 4. Modifica 'enviarMensaje' para que use 'setUsuario'
   const enviarMensaje = () => {
-    const nuevosPuntos = puntos + 1; 
-    setPuntos(nuevosPuntos);
+    const nuevosPuntos = puntos + 1;
 
     if (nuevosPuntos >= puntosPorNivel) {
-      setNivel(nivel + 1);
+      // Sube de nivel
+      setUsuario({
+        ...usuario,
+        nivel: nivel + 1,
+        puntos: nuevosPuntos - puntosPorNivel, // Reinicia los puntos
+      });
+      
+      // Muestra la notificación local
       setNivelSubido(true);
-
-      setPuntos(nuevosPuntos - puntosPorNivel);
-
       setTimeout(() => setNivelSubido(false), 2500);
+
+    } else {
+      // Solo suma puntos
+      setUsuario({
+        ...usuario,
+        puntos: nuevosPuntos,
+      });
     }
   };
-
 
   const comprarMonedas = () => {
     navigate("/comprar-monedas");
@@ -41,7 +54,7 @@ function PerfilEspectador() {
     <div className="perfil-container">
       {nivelSubido && (
         <div className="level-up-notification">
-          🎉 ¡Subiste al nivel {nivel}! 🎉
+          🎉 ¡Subiste al nivel {nivel}! 🎉 
         </div>
       )}
 
@@ -55,10 +68,11 @@ function PerfilEspectador() {
 
         <h2 className="profile-name">{usuario.nombre}</h2>
 
+        {/* 5. Asegúrate de que la UI también lee del contexto */}
         <ul className="profile-stats">
           <li>⭐ Nivel: {nivel}</li>
           <li>🏆 Puntos: {puntos}</li>
-          <li>🟡 Monedas: {monedas}</li>
+          <li>🟡 Monedas: {monedas}</li> {/* Esto arregla el bug de la imagen (1600) vs el código (100) */}
         </ul>
 
         <div className="progress-section">
