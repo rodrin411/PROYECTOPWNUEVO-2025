@@ -1,31 +1,62 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Register.css";
+import "./Register.css"; 
 
 function Register() {
   const [nombre, setNombre] = useState("");
-  const [rol, setRol] = useState("espectador");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleRegister = (e) => {
     e.preventDefault();
 
-    const nuevoUsuario = {
-      nombre,
-      rol,
-      monedas: 500,
-      nivel: 1,
-      puntos: 0,
+    const dbUsuarios = JSON.parse(localStorage.getItem("usuarios")) || {};
+
+    if (dbUsuarios[nombre]) {
+      setError("Este nombre de usuario ya está en uso.");
+      return;
+    }
+
+    // Creamos una "cuenta" que contiene AMBOS perfiles
+    const nuevaCuenta = {
+      nombre: nombre,
+      avatarUrl: "https://cdn-icons-png.flaticon.com/512/4140/4140048.png",
+      
+      // Perfil de espectador con sus datos
+      espectadorData: {
+        monedas: 500,
+        nivel: 1,
+        puntos: 0,
+      },
+
+      // Perfil de streamer con sus datos
+      streamerData: {
+        nivelStreamer: 1,
+        estadisticasStreamer: {
+          horasTotales: 0,
+          sesiones: 0,
+          picoEspectadores: 0,
+          subsActuales: 0,
+        },
+        regalos: []
+      },
     };
 
-    localStorage.setItem("userData", JSON.stringify(nuevoUsuario));
-    navigate("/login");
+    // BD
+    dbUsuarios[nombre] = nuevaCuenta;
+    localStorage.setItem("usuarios", JSON.stringify(dbUsuarios));
+
+    window.location.href = "/login";
+
+    
   };
 
   return (
-    <div className="register-container">
+
+    <div className="register-container"> 
       <h2>Crear Cuenta</h2>
       <form onSubmit={handleRegister}>
+        {error && <p className="error-msg">{error}</p>}
         <input
           type="text"
           placeholder="Nombre de usuario"
@@ -33,10 +64,8 @@ function Register() {
           onChange={(e) => setNombre(e.target.value)}
           required
         />
-        <select value={rol} onChange={(e) => setRol(e.target.value)}>
-          <option value="espectador">Espectador</option>
-          <option value="streamer">Streamer</option>
-        </select>
+        
+
         <button type="submit">Registrar</button>
       </form>
     </div>

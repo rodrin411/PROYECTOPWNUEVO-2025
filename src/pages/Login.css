@@ -16,6 +16,7 @@
   letter-spacing: 1px;
 }
 
+/* Usamos el selector de etiqueta <form> tal como lo tenías */
 form {
   background-color: rgba(255, 255, 255, 0.1);
   padding: 2rem;
@@ -53,6 +54,37 @@ button {
 button:hover {
   background-color: #b5179e;
 }
+
+/* --- ESTILOS AÑADIDOS QUE FALTABAN --- */
+
+/* Para el texto "No tienes cuenta?" que estaba en tu HTML */
+.login-text {
+  margin-top: 1.5rem;
+  color: #e0e0e0;
+}
+
+.login-text a {
+  color: #ffffff;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.login-text a:hover {
+  text-decoration: underline;
+}
+
+/* Para el mensaje de error que programamos */
+.error-msg {
+  color: #ffadad;
+  background-color: rgba(255, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ff5959;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* --- TU MEDIA QUERY ORIGINAL --- */
 
 @media (max-width: 600px) {
   .login-container h2 {

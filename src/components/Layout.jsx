@@ -24,6 +24,8 @@ function Layout() {
   });
 
   useEffect(() => {
+    // Este useEffect que guarda la SESIÓN ('userData') sigue igual.
+    // Es perfecto, guarda el estado de la sesión activa.
     if (usuario) {
       localStorage.setItem('userData', JSON.stringify(usuario));
     } else {
@@ -32,9 +34,43 @@ function Layout() {
   }, [usuario]);
 
   const handleLogout = () => {
-    setUsuario(null);
+    // 1. Cargar la "base de datos" principal
+    const dbUsuarios = JSON.parse(localStorage.getItem("usuarios")) || {};
+
+    // 2. Comprobar que hay un usuario en sesión y que existe en la BD
+    if (usuario && dbUsuarios[usuario.nombre]) {
+      
+      // 3. Recuperamos la CUENTA COMPLETA
+      const cuentaUsuario = dbUsuarios[usuario.nombre];
+
+      // 4. Vemos el ROL de la sesión actual
+      if (usuario.rol === 'espectador') {
+        // 5. Guardamos el progreso de la sesión en el perfil de ESPECTADOR
+        cuentaUsuario.espectadorData = {
+          monedas: usuario.monedas,
+          nivel: usuario.nivel,
+          puntos: usuario.puntos,
+        };
+
+      } else if (usuario.rol === 'streamer') {
+        // 5. Guardamos el progreso de la sesión en el perfil de STREAMER
+        cuentaUsuario.streamerData = {
+          estadisticasStreamer: usuario.estadisticasStreamer,
+          nivelStreamer: usuario.nivelStreamer,
+          regalos: usuario.regalos,
+        };
+      }
+
+      // 6. Guardamos la CUENTA COMPLETA (actualizada) en la BD
+      dbUsuarios[usuario.nombre] = cuentaUsuario;
+      localStorage.setItem("usuarios", JSON.stringify(dbUsuarios));
+    }
+
+    // 7.  Borramos el estado de la sesión y limpiamos 'userData' (vía el useEffect)
+    setUsuario(null); 
     navigate('/login');
   };
+
   
 console.log("Easter Egg XD");
 
@@ -84,17 +120,24 @@ console.log("Easter Egg XD");
         <div className="header-right">
           {usuario ? (
             <>
-              <div className="saldo-display">
-                <div className="coin-icon"></div>
-                <span>{usuario.monedas}</span>
-                <button
-                  className="add-coins-btn"
-                  onClick={() => navigate('/comprar-monedas')}
-                  title="Comprar monedas"
-                >
-                  +
-                </button>
-              </div>
+              {/*
+                Solo mostramos el saldo si el rol es 'espectador'
+              */}
+              {usuario.rol === 'espectador' && (
+                <div className="saldo-display">
+                  <div className="coin-icon"></div>
+                  <span>{usuario.monedas}</span>
+                  <button
+                    className="add-coins-btn"
+                    onClick={() => navigate('/comprar-monedas')}
+                    title="Comprar monedas"
+                  >
+                    +
+                  </button>
+                </div>
+              )}
+
+              {/* El botón de logout se muestra para ambos roles */}
               <button className="logout-btn" onClick={handleLogout}>
                 Cerrar sesión
               </button>
