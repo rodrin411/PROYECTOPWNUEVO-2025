@@ -1,162 +1,420 @@
+/* =========================================
+   1. CONTENEDOR PRINCIPAL Y TARJETAS
+   ========================================= */
 .tienda-container {
   text-align: center;
-  max-width: 800px;
+  max-width: 900px;
   margin: 2rem auto;
   background: linear-gradient(135deg, #121212, #1e1e1e);
   color: #f5f5f5;
-  padding: 2rem 1rem;
+  padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  min-height: 80vh;
 }
 
 .tienda-container h2 {
-  color: #90fc86;
-  margin-bottom: 1rem;
-  font-size: 2rem;
+  color: #00ffcc;
+  margin-bottom: 0.5rem;
+  font-size: 2.2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .tienda-container p {
-  color: #ccc;
-  margin-bottom: 2rem;
-  font-size: 1.1rem;
+  color: #aaa;
+  margin-bottom: 3rem;
+  font-size: 1rem;
 }
 
+/* --- GRID DE PAQUETES --- */
 .paquetes-container {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 2rem;
-  margin-top: 2rem;
 }
 
 .paquete-card {
   background-color: #2a2a2a;
   border: 1px solid #444;
-  border-radius: 10px;
-  padding: 1.5rem;
-  width: 200px;
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  width: 240px;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .paquete-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 255, 204, 0.15);
+  border-color: #00ffcc;
 }
 
-.paquete-card h3 {
-  color: #f5f5f5;
-  margin-bottom: 0.8rem;
-}
-
-.paquete-monedas {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #90fc86;
-  margin: 1rem 0;
-}
-
-.paquete-card button {
-  background-color: #03dac6;
-  color: #121212;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 5px;
-  font-weight: bold;
-  cursor: pointer;
-  width: 100%;
-  transition: background-color 0.3s ease, transform 0.1s ease-in-out;
-}
-
-.paquete-card button:hover {
-  background-color: #00c0ad;
+/* Estilos especiales para el Popular */
+.paquete-card.popular {
+  border: 2px solid #00ffcc;
+  background: linear-gradient(to bottom, #2a2a2a, #1f2f2a);
   transform: scale(1.05);
 }
 
-.mensaje-exito {
-  background-color: rgba(144, 252, 134, 0.15);
-  border: 1px solid #90fc86;
-  color: #90fc86;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-top: 1.5rem;
+.paquete-card.popular:hover {
+  transform: scale(1.08) translateY(-10px);
+}
+
+.badge-popular {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #00ffcc;
+  color: #000;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.8rem;
   font-weight: bold;
-  animation: fadeIn 0.3s ease-in-out;
-}
-.moneda {
-  position: fixed;
-  top: -20px;
-  width: 25px;
-  height: 25px;
-  background-image: url('https://cdn-icons-png.flaticon.com/512/138/138292.png');
-  background-size: cover;
-  pointer-events: none;
-  animation: caerMoneda linear;
-  z-index: 1000;
+  box-shadow: 0 4px 10px rgba(0, 255, 204, 0.4);
 }
 
-@keyframes caerMoneda {
-  0% {
-    transform: translateY(0) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) rotate(360deg);
-    opacity: 0;
-  }
+.paquete-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: white;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@media (max-width: 600px) {
-  .tienda-container {
-    padding: 1.5rem;
-  }
-
-  .paquete-card {
-    width: 100%;
-    padding: 1rem;
-  }
-
-  .paquete-monedas {
-    font-size: 1.8rem;
-  }
-}
-/* === Diseño elegante de monedas dentro de la tienda === */
+/* --- ÍCONO DE MONEDA ANIMADO --- */
 .moneda-tienda {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 10px;
+  font-size: 2rem;
   font-weight: bold;
-  color: #fff;
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
+  color: white;
+  margin: 1rem 0;
 }
 
 .coin-icon {
-  width: 22px;
-  height: 22px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, #ffe259, #ffa751);
-  box-shadow: 0 0 10px #ffd966, inset 0 0 3px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 10px #ffd966;
   animation: brillo 2s infinite alternate;
 }
 
 @keyframes brillo {
-  0% {
-    box-shadow: 0 0 5px #ffd966, inset 0 0 2px rgba(0, 0, 0, 0.5);
-  }
-  100% {
-    box-shadow: 0 0 15px #ffea80, inset 0 0 4px rgba(0, 0, 0, 0.7);
-  }
+  0% { box-shadow: 0 0 5px #ffd966; }
+  100% { box-shadow: 0 0 20px #ffea80; }
 }
 
+.precio {
+  font-size: 1.5rem;
+  color: #ccc;
+  margin: 1rem 0;
+  font-weight: 500;
+}
+
+.paquete-card button {
+  background-color: #00ffcc;
+  color: #121212;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  font-size: 1rem;
+  transition: background 0.3s;
+}
+
+.paquete-card button:hover {
+  background-color: #00dbaf;
+}
+
+/* =========================================
+   2. SISTEMA DE MODAL (Overlay y Caja)
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.85); /* Fondo oscuro */
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s;
+}
+
+.modal-content {
+  background: #181818;
+  width: 90%;
+  max-width: 420px;
+  border-radius: 12px;
+  padding: 25px;
+  border: 1px solid #333;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+  color: white;
+  position: relative;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Encabezado del Modal */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 15px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #00ffcc;
+  font-size: 1.4rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 1.8rem;
+  cursor: pointer;
+  line-height: 1;
+}
+.close-btn:hover { color: white; }
+
+/* =========================================
+   3. FORMULARIO DE TARJETA
+   ========================================= */
+.resumen-compra {
+  text-align: center;
+  background: #222;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 1rem;
+  color: #ddd;
+}
+
+.input-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  color: #aaa;
+  font-weight: 500;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  background: #0f0f0f; /* Input oscuro */
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: white;
+  font-size: 1rem;
+  outline: none;
+  box-sizing: border-box; /* Crucial para que el padding no rompa el ancho */
+  transition: border 0.3s, box-shadow 0.3s;
+}
+
+.input-group input:focus {
+  border-color: #9d00ff; /* Morado al enfocar */
+  box-shadow: 0 0 0 3px rgba(157, 0, 255, 0.2);
+}
+
+/* --- ALINEACIÓN DE FECHA Y CVV (50% - 50%) --- */
+.fila-doble {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+}
+
+.fila-doble .input-group {
+  flex: 1; /* Ambos ocupan el mismo espacio */
+  min-width: 0;
+}
+
+/* Botón Pagar */
+.btn-pagar {
+  width: 100%;
+  background: #9d00ff; /* Morado */
+  color: white;
+  padding: 14px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: background 0.3s;
+  box-shadow: 0 4px 15px rgba(157, 0, 255, 0.3);
+}
+
+.btn-pagar:hover {
+  background: #b44aff;
+}
+
+/* --- ÍCONOS DE TARJETAS (FONDO BLANCO) --- */
+.iconos-tarjetas {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #333;
+}
+
+.card-logo {
+  height: 32px;
+  background: white; /* Fondo blanco para resaltar logo */
+  padding: 3px 6px;
+  border-radius: 4px;
+  object-fit: contain;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+/* =========================================
+   4. PANTALLA DE CARGA (SPINNER)
+   ========================================= */
+.vista-carga {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border-left-color: #9d00ff;
+  margin: 0 auto 20px auto;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { 
+  0% { transform: rotate(0deg); } 
+  100% { transform: rotate(360deg); } 
+}
+
+/* =========================================
+   5. MODAL DE ÉXITO
+   ========================================= */
+.modal-content.exito {
+  text-align: center;
+  border-color: #00ffcc;
+}
+
+.icono-check {
+  width: 70px;
+  height: 70px;
+  background: #00ffcc;
+  color: black;
+  border-radius: 50%;
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px auto;
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
+}
+
+.detalles-recibo {
+  background: #222;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: left;
+  margin: 20px 0;
+  font-size: 0.95rem;
+  color: #ccc;
+  border-left: 4px solid #00ffcc;
+}
+
+.detalles-recibo p {
+  margin: 8px 0;
+}
+
+.acciones-exito {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-descargar {
+  background: #333;
+  color: white;
+  border: 1px solid #555;
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-descargar:hover { background: #444; }
+
+.btn-cerrar {
+  background: #00ffcc;
+  color: black;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* =========================================
+   6. ANIMACIÓN DE MONEDAS CAYENDO (Global)
+   ========================================= */
+.moneda {
+  position: fixed;
+  top: -50px;
+  width: 30px;
+  height: 30px;
+  background-image: url('https://cdn-icons-png.flaticon.com/512/138/138292.png');
+  background-size: cover;
+  pointer-events: none;
+  animation: caerMoneda linear forwards;
+  z-index: 3000;
+}
+
+@keyframes caerMoneda {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* =========================================
+   7. RESPONSIVE
+   ========================================= */
+@media (max-width: 600px) {
+  .tienda-container {
+    padding: 1rem;
+  }
+  .paquetes-container {
+    gap: 1rem;
+  }
+  .paquete-card {
+    width: 100%;
+  }
+  .fila-doble {
+    gap: 10px;
+  }
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+}
