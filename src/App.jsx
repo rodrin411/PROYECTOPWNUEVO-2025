@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -7,9 +8,15 @@ import DashboardStreamer from './pages/DashboardStreamer';
 import ComprarMonedas from './pages/ComprarMonedas';
 import Nosotros from './pages/Nosotros';
 import Terminos from './pages/Terminos';
+import VistaTransmision from './pages/VistaTransmision';
 import "./pages/PaginaPrincipal.css";
 
+
+
 function Home() {
+
+  const navigate = useNavigate();
+
   // Datos ficticios de streams
   const streams = [
     { id: 1, titulo: "Jugando Fortnite con la comunidad", streamer: "GamerPro", img: "https://picsum.photos/300/200?random=1" },
@@ -22,11 +29,15 @@ function Home() {
 
   const sidebarStreamers = ["GamerPro", "RockLive", "DevMaster", "ChefLoco", "CinemaTalks", "BlockHero"];
 
+  const irAlStream = (stream) => {
+    // Navegamos a /stream/1 (por ejemplo) y le pasamos todo el objeto 'stream'
+    navigate(`/stream/${stream.id}`, { state: stream });
+  }; 
+    
   return (
     <div className="principal-container">
-      {/* ---- SIDEBAR ---- */}
       <aside className="sidebar">
-        <h3>Streamers</h3>
+        <h3 style={{color: '#00ffcc'}}>Canales</h3>
         <ul>
           {sidebarStreamers.map((s, index) => (
             <li key={index}>{s}</li>
@@ -39,7 +50,12 @@ function Home() {
         <h2>Streams en vivo</h2>
         <div className="streams-grid">
           {streams.map((stream) => (
-            <div key={stream.id} className="stream-card">
+            <div 
+            key={stream.id} 
+            className="stream-card"
+            onClick={() => irAlStream(stream)} 
+            style={{cursor: 'pointer'}} 
+            >
               <img src={stream.img} alt={stream.titulo} />
               <h4>{stream.titulo}</h4>
               <p>{stream.streamer}</p>
@@ -78,6 +94,7 @@ function App() {
           />
           <Route path="/nosotros" element={<Nosotros />} />
           <Route path="/terminos" element={<Terminos />} />
+          <Route path="/stream/:id" element={<VistaTransmision />} />
         </Route>
       </Routes>
     </Router>
