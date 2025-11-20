@@ -50,15 +50,16 @@
   border: 1px solid #444;
 }
 
-.logo {
-  color: #90fc86;
-  font-weight: 800;
-  font-size: 1.6rem;
-  text-decoration: none;
-  transition: transform 0.2s ease-in-out;
+.logo-a {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: white;
+  letter-spacing: -1px;
+  margin-bottom: 10px;
 }
-.logo span {
-  color: #03dac6;
+.logo-a span {
+  color: #00ffcc;
+  text-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
 }
 
 .logo:hover {
@@ -122,8 +123,9 @@
 
 .main-nav a {
   color: #90fc86;
+  font-size: 1.2rem;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 700;
   transition: color 0.3s ease;
 }
 
@@ -169,7 +171,6 @@
   gap: 0.8rem;
 }
 
-.login-btn,
 .register-btn {
   padding: 0.4rem 1rem;
   border-radius: 20px;
@@ -178,9 +179,18 @@
   font-weight: bold;
   text-decoration: none;
   transition: all 0.3s ease;
+  background: linear-gradient(135deg, #90fc86, #00e676);
+  color: #121212;
 }
 
 .login-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: none;
+  transition: all 0.3s ease;
   background: linear-gradient(135deg, #03dac6, #00bfa5);
   color: #121212;
 }
@@ -189,12 +199,6 @@
   box-shadow: 0 0 10px #03dac6;
   transform: scale(1.05);
 }
-
-.register-btn {
-  background: linear-gradient(135deg, #90fc86, #00e676);
-  color: #121212;
-}
-
 
 .register-btn:hover {
   box-shadow: 0 0 10px #90fc86;
@@ -206,13 +210,15 @@
   border: none;
   color: #121212;
   font-weight: bold;
+  font-size: 0.9rem;
+  font-weight: 700;
   border-radius: 20px;
-  padding: 0.4rem 1rem;
+  padding: 0.6rem 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .logout-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 10px #55f923;
+  box-shadow: 0 0 10px #f9d52300;
 }

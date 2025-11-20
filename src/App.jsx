@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react'; 
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -10,12 +10,11 @@ import Nosotros from './pages/Nosotros';
 import Terminos from './pages/Terminos';
 import VistaTransmision from './pages/VistaTransmision';
 import StreamManager from './pages/StreamManager';
-import "./pages/PaginaPrincipal.css";
+import "./App.css";
 
 
-
+// Componente Home separado con su propia importación de useNavigate
 function Home() {
-
   const navigate = useNavigate();
 
   // Datos ficticios de streams
@@ -31,7 +30,6 @@ function Home() {
   const sidebarStreamers = ["GamerPro", "RockLive", "DevMaster", "ChefLoco", "CinemaTalks", "BlockHero"];
 
   const irAlStream = (stream) => {
-    // Navegamos a /stream/1 (por ejemplo) y le pasamos todo el objeto 'stream'
     navigate(`/stream/${stream.id}`, { state: stream });
   }; 
     
@@ -46,16 +44,15 @@ function Home() {
         </ul>
       </aside>
 
-      {/* ---- CONTENIDO PRINCIPAL ---- */}
       <section className="streams-section">
         <h2>Streams en vivo</h2>
         <div className="streams-grid">
           {streams.map((stream) => (
             <div 
-            key={stream.id} 
-            className="stream-card"
-            onClick={() => irAlStream(stream)} 
-            style={{cursor: 'pointer'}} 
+              key={stream.id} 
+              className="stream-card"
+              onClick={() => irAlStream(stream)} 
+              style={{cursor: 'pointer'}} 
             >
               <img src={stream.img} alt={stream.titulo} />
               <h4>{stream.titulo}</h4>
@@ -69,33 +66,46 @@ function Home() {
 }
 
 function App() {
-  const userData = JSON.parse(localStorage.getItem('userData'));
+  // ESTADO GLOBAL DEL USUARIO 
+  const [usuario, setUsuario] = useState(() => {
+    const savedData = localStorage.getItem('userData');
+    return savedData ? JSON.parse(savedData) : null;
+  });
+
+  // Sincronizar localStorage cuando el usuario cambia
+  useEffect(() => {
+    if (usuario) {
+      localStorage.setItem('userData', JSON.stringify(usuario));
+    } else {
+      localStorage.removeItem('userData');
+    }
+  }, [usuario]);
 
   return (
     <Router>
       <Routes>
         {/* Páginas públicas */}
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login setUsuarioGlobal={setUsuario} />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Layout con Outlet */}
-        <Route element={<Layout />}>
+        {/* Layout con Outlet - Pasamos el estado global */}
+        <Route element={<Layout usuario={usuario} setUsuario={setUsuario} />}>
           <Route path="/" element={<Home />} />
           <Route
             path="/perfil-espectador"
-            element={userData ? <PerfilEspectador /> : <Navigate to="/login" />}
+            element={usuario ? <PerfilEspectador /> : <Navigate to="/login" />}
           />
           <Route
             path="/dashboard-streamer"
-            element={userData ? <DashboardStreamer /> : <Navigate to="/login" />}
+            element={usuario ? <DashboardStreamer /> : <Navigate to="/login" />}
           />
           <Route
             path="/comprar-monedas"
-            element={userData ? <ComprarMonedas /> : <Navigate to="/login" />}
+            element={usuario ? <ComprarMonedas /> : <Navigate to="/login" />}
           />
           <Route
             path="/stream-manager"
-            element={userData ? <StreamManager /> : <Navigate to="/login" />}
+            element={usuario ? <StreamManager /> : <Navigate to="/login" />}
           />
           <Route path="/nosotros" element={<Nosotros />} />
           <Route path="/terminos" element={<Terminos />} />
