@@ -97,11 +97,9 @@ function Register() {
         },
       };
 
-      // Guardar en la base de datos
       dbUsuarios[datosFormulario.nombre] = nuevaCuenta;
       localStorage.setItem("usuarios", JSON.stringify(dbUsuarios));
-
-      // Redirigir al login con mensaje de éxito
+      
       navigate('/login', { 
         state: { 
           mensaje: "¡Cuenta creada exitosamente! Ya puedes iniciar sesión." 

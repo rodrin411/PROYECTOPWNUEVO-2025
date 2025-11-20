@@ -49,7 +49,7 @@ function VistaTransmision() {
         const nuevoBot = {
             id: Date.now(),
             autor: users[Math.floor(Math.random() * users.length)],
-            nivel: Math.floor(Math.random() * 40) + 1, // Nivel aleatorio
+            nivel: Math.floor(Math.random() * 40) + 1, 
             texto: texts[Math.floor(Math.random() * texts.length)],
             esYo: false,
             esMod: Math.random() > 0.9 // 10% chance de ser mod
@@ -186,8 +186,6 @@ function VistaTransmision() {
 
       <aside className="barra-lateral-chat">
          <div className="encabezado-chat">Chat de la transmisión</div>
-         
-         {/* Esta es tu alerta original de nivel, la mantenemos intacta */}
          {notificacionNivel && <div className="alerta-nivel-flotante">🎉 ¡Nivel {notificacionNivel} alcanzado!</div>}
 
          <div className="caja-mensajes" ref={referenciaChat}>
@@ -217,7 +215,7 @@ function VistaTransmision() {
          </form>
       </aside>
 
-      {/* --- MODAL DE REGALOS (Tu estructura original) --- */}
+      {/* --- MODAL DE REGALOS  --- */}
       {mostrarModalRegalos && (
           <div className="overlay-regalos">
               <div className="modal-regalos">

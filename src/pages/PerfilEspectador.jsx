@@ -30,7 +30,6 @@ function PerfilEspectador() {
   const progreso = Math.min((puntosEnEsteNivel / rangoDelNivel) * 100, 100);
   const puntosRestantes = Math.max(techoNivelActual - puntos, 0);
 
-  // --- SUPERVISOR AUTOMÁTICO (NUEVO) ---
   useEffect(() => {
     if (puntos >= techoNivelActual) {
       setUsuario({
@@ -73,7 +72,6 @@ function PerfilEspectador() {
               <span className="progress-text">{Math.floor(progreso)}%</span>
             </div>
           </div>
-          {/* Mensaje dinámico */}
           <p className="remaining">
             {puntosEnEsteNivel} / {rangoDelNivel} XP (Faltan {puntosRestantes} para Nivel {nivel + 1})
           </p>

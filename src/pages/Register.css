@@ -13,7 +13,7 @@
 .tarjeta-auth {
   background: #121212;
   width: 100%;
-  max-width: 480px; /* Un poco más ancho que el login */
+  max-width: 480px; 
   padding: 40px;
   border-radius: 16px;
   border: 1px solid #222;
@@ -88,14 +88,13 @@
   box-sizing: border-box;
 }
 
-/* Estilo específico para selector de fecha oscuro */
 input[type="date"] {
   color-scheme: dark;
   color: #ddd;
 }
 
 .grupo-input input:focus {
-  border-color: #a855f7; /* Morado para registro para diferenciar sutilmente */
+  border-color: #a855f7; 
   box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
   background: #202023;
 }

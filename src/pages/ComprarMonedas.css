@@ -1,6 +1,3 @@
-/* =========================================
-   1. CONTENEDOR PRINCIPAL Y TARJETAS
-   ========================================= */
 .tienda-container {
   text-align: center;
   max-width: 900px;
@@ -27,7 +24,6 @@
   font-size: 1rem;
 }
 
-/* --- GRID DE PAQUETES --- */
 .paquetes-container {
   display: flex;
   justify-content: center;
@@ -85,7 +81,6 @@
   color: white;
 }
 
-/* --- ÍCONO DE MONEDA ANIMADO --- */
 .moneda-tienda {
   display: flex;
   align-items: center;
@@ -135,9 +130,6 @@
   background-color: #00dbaf;
 }
 
-/* =========================================
-   2. SISTEMA DE MODAL (Overlay y Caja)
-   ========================================= */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0;
@@ -168,7 +160,7 @@
   to { opacity: 1; }
 }
 
-/* Encabezado del Modal */
+
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -194,9 +186,7 @@
 }
 .close-btn:hover { color: white; }
 
-/* =========================================
-   3. FORMULARIO DE TARJETA
-   ========================================= */
+
 .resumen-compra {
   text-align: center;
   background: #222;
@@ -223,13 +213,13 @@
 .input-group input {
   width: 100%;
   padding: 12px;
-  background: #0f0f0f; /* Input oscuro */
+  background: #0f0f0f; 
   border: 1px solid #333;
   border-radius: 6px;
   color: white;
   font-size: 1rem;
   outline: none;
-  box-sizing: border-box; /* Crucial para que el padding no rompa el ancho */
+  box-sizing: border-box; 
   transition: border 0.3s, box-shadow 0.3s;
 }
 
@@ -238,7 +228,6 @@
   box-shadow: 0 0 0 3px rgba(157, 0, 255, 0.2);
 }
 
-/* --- ALINEACIÓN DE FECHA Y CVV (50% - 50%) --- */
 .fila-doble {
   display: flex;
   gap: 15px;
@@ -246,11 +235,10 @@
 }
 
 .fila-doble .input-group {
-  flex: 1; /* Ambos ocupan el mismo espacio */
+  flex: 1; 
   min-width: 0;
 }
 
-/* Botón Pagar */
 .btn-pagar {
   width: 100%;
   background: #9d00ff; /* Morado */
@@ -270,7 +258,6 @@
   background: #b44aff;
 }
 
-/* --- ÍCONOS DE TARJETAS (FONDO BLANCO) --- */
 .iconos-tarjetas {
   display: flex;
   justify-content: center;
@@ -282,16 +269,13 @@
 
 .card-logo {
   height: 32px;
-  background: white; /* Fondo blanco para resaltar logo */
+  background: white; 
   padding: 3px 6px;
   border-radius: 4px;
   object-fit: contain;
   box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
-/* =========================================
-   4. PANTALLA DE CARGA (SPINNER)
-   ========================================= */
 .vista-carga {
   text-align: center;
   padding: 40px 0;
@@ -312,9 +296,6 @@
   100% { transform: rotate(360deg); } 
 }
 
-/* =========================================
-   5. MODAL DE ÉXITO
-   ========================================= */
 .modal-content.exito {
   text-align: center;
   border-color: #00ffcc;
@@ -376,9 +357,7 @@
   cursor: pointer;
 }
 
-/* =========================================
-   6. ANIMACIÓN DE MONEDAS CAYENDO (Global)
-   ========================================= */
+/* ANIMACIÓN DE MONEDAS CAYENDO  */
 .moneda {
   position: fixed;
   top: -50px;
@@ -397,9 +376,7 @@
   100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
 }
 
-/* =========================================
-   7. RESPONSIVE
-   ========================================= */
+/* RESPONSIVE */
 @media (max-width: 600px) {
   .tienda-container {
     padding: 1rem;

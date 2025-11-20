@@ -19,7 +19,7 @@ function DashboardStreamer() {
     { id: 'def-3', nombre: 'Fuego', costo: 100, xp: 50, emoji: '🔥' }
   ];
 
-  // --- LOGICA MAGICA: INICIALIZAR DEFAULTS ---
+  // --- INICIALIZAR DEFAULTS ---
   useEffect(() => {
     if (!usuario.regalos) {
       setUsuario(prev => ({
@@ -29,15 +29,12 @@ function DashboardStreamer() {
     }
   }, [usuario.regalos, setUsuario]);
 
-  // Ahora 'regalos' siempre leerá del estado (sea los defaults o los que agregues)
   const regalos = usuario.regalos || []; 
-
-  // Lógica de Estadísticas
   const nivel = usuario.nivelStreamer || 1;
   const horas = usuario.estadisticasStreamer?.horasTotales || 0;
   const progreso = Math.min((horas % 10) * 10, 100); 
 
-  // --- FUNCIONES DE REGALOS (CRUD) ---
+  // --- FUNCIONES DE REGALOS ---
   const handleInputChange = (e) => {
     setNuevoRegalo({ ...nuevoRegalo, [e.target.name]: e.target.value });
   };
@@ -54,7 +51,6 @@ function DashboardStreamer() {
       emoji: nuevoRegalo.emoji
     };
 
-    // Guardamos en el usuario global (se suma a lo que ya haya, incluidos defaults)
     setUsuario({
       ...usuario,
       regalos: [...regalos, regaloCreado]
