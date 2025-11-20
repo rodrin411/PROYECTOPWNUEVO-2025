@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useOutletContext, useLocation, useNavigate } from 'react-router-dom';
+import { useOutletContext, useLocation, useNavigate } from 'react-router-dom';
 import './VistaTransmision.css';
 
 function VistaTransmision() {
@@ -39,9 +39,32 @@ function VistaTransmision() {
       }
   }, [mensajes]);
 
+  // --- SIMULACIÓN DE CHAT  ---
+  useEffect(() => {
+    const loop = setInterval(() => {
+      if (Math.random() < 0.3) {
+        const users = ["Viewer1", "GamerPro", "Fan_Kick", "Troll99", "Anonimo"];
+        const texts = ["Hola!", "GG", "Que pro", "Juega otra cosa", "Saludame!", "lol", "POG", "F"];
+        
+        const nuevoBot = {
+            id: Date.now(),
+            autor: users[Math.floor(Math.random() * users.length)],
+            nivel: Math.floor(Math.random() * 40) + 1, // Nivel aleatorio
+            texto: texts[Math.floor(Math.random() * texts.length)],
+            esYo: false,
+            esMod: Math.random() > 0.9 // 10% chance de ser mod
+        };
+
+        setMensajes(prev => [...prev.slice(-49), nuevoBot]); // Mantenemos ultimos 50
+      }
+    }, 2500);
+
+    return () => clearInterval(loop);
+  }, []);
+
   const calcularTechoNivel = (n) => (10 * n * (n + 1)) / 2;
 
-  // --- FUNCIÓN ENVIAR REGALO  ---
+  // --- FUNCIÓN ENVIAR REGALO ---
   const enviarRegalo = () => {
       if (!regaloSeleccionado) return;
       if (!usuario) return alert("Inicia sesión para enviar regalos");
@@ -51,23 +74,18 @@ function VistaTransmision() {
           return;
       }
 
-      // Lógica de Niveles
       const nivelActual = usuario.nivel || 1;
       const puntosActuales = usuario.puntos || 0;
-      
       const monedasRestantes = usuario.monedas - regaloSeleccionado.costo;
       const nuevosPuntos = puntosActuales + regaloSeleccionado.xp;
       
       let nuevoNivelCalculado = nivelActual;
-
-      //Mientras tengas puntos, sigue subiendo
       while (nuevosPuntos >= calcularTechoNivel(nuevoNivelCalculado)) {
           nuevoNivelCalculado++;
       }
 
       let huboSubidaDeNivel = nuevoNivelCalculado > nivelActual;
 
-      // Mensaje en el Chat
       const mensajeRegalo = {
           id: Date.now(),
           autor: usuario.nombre,
@@ -79,7 +97,6 @@ function VistaTransmision() {
 
       setMensajes([...mensajes, mensajeRegalo]);
 
-      // Actualizar Usuario Global
       setUsuario({ 
           ...usuario, 
           monedas: monedasRestantes,
@@ -106,7 +123,7 @@ function VistaTransmision() {
       navigate('/comprar-monedas');
   };
 
-  // --- FUNCIÓN ENVIAR MENSAJE  ---
+  // --- FUNCIÓN ENVIAR MENSAJE ---
   const enviarMensaje = (e) => {
     e.preventDefault();
     if (!nuevoMensaje.trim()) return;
@@ -117,7 +134,6 @@ function VistaTransmision() {
     const nuevosPuntos = puntosActuales + 1;
     
     let nuevoNivelCalculado = nivelActual;
-
     while (nuevosPuntos >= calcularTechoNivel(nuevoNivelCalculado)) {
         nuevoNivelCalculado++;
     }
@@ -134,9 +150,7 @@ function VistaTransmision() {
     setNuevoMensaje("");
 
     setUsuario({ 
-        ...usuario, 
-        puntos: nuevosPuntos, 
-        nivel: nuevoNivelCalculado 
+        ...usuario, puntos: nuevosPuntos, nivel: nuevoNivelCalculado 
     });
 
     if (huboSubidaDeNivel) {
@@ -173,6 +187,7 @@ function VistaTransmision() {
       <aside className="barra-lateral-chat">
          <div className="encabezado-chat">Chat de la transmisión</div>
          
+         {/* Esta es tu alerta original de nivel, la mantenemos intacta */}
          {notificacionNivel && <div className="alerta-nivel-flotante">🎉 ¡Nivel {notificacionNivel} alcanzado!</div>}
 
          <div className="caja-mensajes" ref={referenciaChat}>
@@ -190,13 +205,19 @@ function VistaTransmision() {
          <form className="area-input-chat" onSubmit={enviarMensaje}>
             <input value={nuevoMensaje} onChange={e => setNuevoMensaje(e.target.value)} placeholder="Enviar mensaje..." />
             <div className="pie-chat">
+                {usuario?.rol === 'espectador' ? (
+                    <>
                 <span className="mis-puntos">🏆 {usuario?.puntos || 0}</span>
                 <button type="button" className="boton-regalo" onClick={() => setMostrarModalRegalos(true)}>🎁</button>
+                    </>
+                ) : (
+                    <span className="identidad-streamer" style={{color: '#aaa', fontSize: '0.8rem'}}>Modo Streamer 🎥</span>
+                )}
             </div>
          </form>
       </aside>
 
-      {/* --- MODAL DE REGALOS --- */}
+      {/* --- MODAL DE REGALOS (Tu estructura original) --- */}
       {mostrarModalRegalos && (
           <div className="overlay-regalos">
               <div className="modal-regalos">

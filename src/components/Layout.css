@@ -202,7 +202,7 @@
 }
 
 .logout-btn {
-  background: linear-gradient(135deg, #ff4e50, #f9d423);
+  background: #03dac6;
   border: none;
   color: #121212;
   font-weight: bold;
@@ -214,5 +214,5 @@
 
 .logout-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 10px #f9d423;
+  box-shadow: 0 0 10px #55f923;
 }

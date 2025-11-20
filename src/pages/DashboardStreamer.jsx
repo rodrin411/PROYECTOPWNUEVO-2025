@@ -1,145 +1,177 @@
-import { useState } from 'react';
-// 1. IMPORTAMOS 'setUsuario' DESDE EL CONTEXTO
-import { useOutletContext } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 import './DashboardStreamer.css';
 
 function DashboardStreamer() {
-  // 2. OBTENEMOS 'setUsuario' JUNTO CON 'usuario'
   const { usuario, setUsuario } = useOutletContext();
+  const navigate = useNavigate();
 
-  // 3. ELIMINAMOS LOS 'useState' PARA 'nivel' y 'horasActuales'
-  //    Mantenemos los que SÍ son locales (regalos y notificación)
-  const [nivelSubido, setNivelSubido] = useState(false);
+  // --- ESTADOS DEL MODAL DE REGALOS ---
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const [nuevoRegalo, setNuevoRegalo] = useState({ nombre: '', costo: '', xp: '', emoji: '🎁' });
 
-  // 4. LEEMOS LOS DATOS DIRECTAMENTE DEL 'usuario' GLOBAL
-  const nivel = usuario.nivelStreamer || 1;
-  const horasActuales = usuario.estadisticasStreamer.horasTotales || 0;
-  // Guardamos las stats para usarlas fácil
-  const stats = usuario.estadisticasStreamer;
-  const regalos = usuario.regalos || [];
+  const catalogoEmojis = ['🎁', '👋', '🔥', '⭐', '👑', '💎', '🎉', '👻', '🎮', '💩', '🌹', '🍕'];
+  
+  // Definimos los defaults aquí para usarlos en la inicialización
+  const regalosDefault = [
+    { id: 'def-1', nombre: 'Like', costo: 10, xp: 5, emoji: '👍' },
+    { id: 'def-2', nombre: 'Rosas', costo: 50, xp: 20, emoji: '🌹' },
+    { id: 'def-3', nombre: 'Fuego', costo: 100, xp: 50, emoji: '🔥' }
+  ];
 
-
-  // 5. MODIFICAMOS 'agregarHora' PARA USAR 'setUsuario'
-  const agregarHora = () => {
-    const nuevasHoras = horasActuales + 1;
-    let nuevoNivel = nivel; // Por defecto, el nivel no cambia
-
-    // Mantenemos tu lógica de niveles
-    const horasNecesarias = nivel * 10;
-    const horasHastaNivelAnterior = ((nivel - 1) * nivel * 5);
-    const horasEnNivelActual = nuevasHoras - horasHastaNivelAnterior;
-
-    if (horasEnNivelActual >= horasNecesarias) {
-      // Sube de nivel
-      nuevoNivel = nivel + 1;
-      setNivelSubido(true); // Esto es local y está bien
-      setTimeout(() => setNivelSubido(false), 2500);
+  // --- LOGICA MAGICA: INICIALIZAR DEFAULTS ---
+  useEffect(() => {
+    if (!usuario.regalos) {
+      setUsuario(prev => ({
+        ...prev,
+        regalos: regalosDefault
+      }));
     }
+  }, [usuario.regalos, setUsuario]);
 
-    // 6. ¡AQUÍ ESTÁ LA MAGIA!
-    // Actualizamos el estado GLOBAL con 'setUsuario'
-    setUsuario({
-      ...usuario, // Mantenemos los datos (nombre, avatar, rol...)
-      nivelStreamer: nuevoNivel, // Guardamos el nuevo nivel
-      estadisticasStreamer: { // Creamos un nuevo objeto de stats
-        ...stats, // Mantenemos las stats viejas (sesiones, pico, etc.)
-        horasTotales: nuevasHoras, // Sobrescribimos solo las horas
-      },
-    });
+  // Ahora 'regalos' siempre leerá del estado (sea los defaults o los que agregues)
+  const regalos = usuario.regalos || []; 
+
+  // Lógica de Estadísticas
+  const nivel = usuario.nivelStreamer || 1;
+  const horas = usuario.estadisticasStreamer?.horasTotales || 0;
+  const progreso = Math.min((horas % 10) * 10, 100); 
+
+  // --- FUNCIONES DE REGALOS (CRUD) ---
+  const handleInputChange = (e) => {
+    setNuevoRegalo({ ...nuevoRegalo, [e.target.name]: e.target.value });
   };
 
-  // Esta función es local y no cambia
-  const agregarRegalo = () => {
-    const nuevo = { id: regalos.length + 1, nombre: `Regalo 🎁 #${regalos.length + 1}` };
-    
-    // Actualizamos el estado GLOBAL
+  const agregarRegalo = (e) => {
+    e.preventDefault();
+    if (!nuevoRegalo.nombre || !nuevoRegalo.costo) return;
+
+    const regaloCreado = {
+      id: Date.now(),
+      nombre: nuevoRegalo.nombre,
+      costo: parseInt(nuevoRegalo.costo),
+      xp: parseInt(nuevoRegalo.xp) || 10,
+      emoji: nuevoRegalo.emoji
+    };
+
+    // Guardamos en el usuario global (se suma a lo que ya haya, incluidos defaults)
     setUsuario({
-      ...usuario, // Mantenemos los datos (nombre, rol, stats...)
-      regalos: [...regalos, nuevo] // Añadimos el nuevo regalo al array
+      ...usuario,
+      regalos: [...regalos, regaloCreado]
     });
+
+    setNuevoRegalo({ nombre: '', costo: '', xp: '', emoji: '🎁' });
   };
 
-  // 7. EL RESTO DE TU CÓDIGO (CÁLCULOS Y RETURN) FUNCIONA PERFECTO
-  //    Ya que 'nivel' y 'horasActuales' ahora vienen del 'usuario' global,
-  //    se recalcularán solos cada vez que 'usuario' cambie.
-  const horasNecesarias = nivel * 10;
-  const horasHastaNivelAnterior = ((nivel - 1) * nivel * 5);
-  const horasEnNivelActual = horasActuales - horasHastaNivelAnterior;
-
-  const progresoHoras = Math.min((horasEnNivelActual / horasNecesarias) * 100, 100);
-  const horasRestantes = Math.max(horasNecesarias - horasEnNivelActual, 0);
+  const eliminarRegalo = (id) => {
+    const regalosFiltrados = regalos.filter(r => r.id !== id);
+    setUsuario({ ...usuario, regalos: regalosFiltrados });
+  };
 
   return (
     <div className="dashboard-container">
-      {nivelSubido && (
-        <div className="overlay-streamer">
-          {/* 'nivel' se toma del estado global actualizado */}
-          🎉 ¡Has subido al nivel {nivel}! 🎉
-        </div>
-      )}
+      <div className="welcome-banner">
+        <h1>Hola, {usuario.nombre} 👋</h1>
+        <p>Panel de Control y Gestión</p>
+      </div>
 
-      <h2>Dashboard de {usuario.nombre}</h2>
-      <p>Resumen de tu actividad como streamer:</p>
-
-      <div className="dashboard-grid">
-        <div className="stat-card">
-          <div className="stat-card-icon">⭐</div>
-          <div className="stat-card-value">{nivel}</div>
-          <div className="stat-card-label">Nivel Streamer</div>
+      <div className="actions-grid">
+        <div className="action-card primary" onClick={() => navigate('/stream-manager')}>
+          <div className="icon-circle">🎥</div>
+          <h3>Panel de Transmisión</h3>
+          <p>Inicia tu directo, simula chat y alertas.</p>
+          <button className="btn-action">Abrir Panel</button>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-card-icon">⏰</div>
-          <div className="stat-card-value">{horasActuales}</div>
-          <div className="stat-card-label">Horas Transmitidas</div>
-          <button onClick={agregarHora}>+1 hora</button>
-        </div>
-
-        {/* El resto de las cards leen de 'usuario', lo cual está perfecto */}
-        <div className="stat-card">
-          <div className="stat-card-icon">📡</div>
-          <div className="stat-card-value">{stats.sesiones}</div>
-          <div className="stat-card-label">Sesiones de Stream</div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-card-icon">👥</div>
-          <div className="stat-card-value">{stats.picoEspectadores}</div>
-          <div className="stat-card-label">Pico de Espectadores</div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-card-icon">❤️</div>
-          <div className="stat-card-value">{stats.subsActuales}</div>
-          <div className="stat-card-label">Suscriptores</div>
+        <div className="action-card secondary" onClick={() => setMostrarModal(true)}>
+          <div className="icon-circle">🎁</div>
+          <h3>Gestionar Regalos</h3>
+          <p>Configura {regalos.length} recompensas activas.</p>
+          <button className="btn-action outline">Configurar</button>
         </div>
       </div>
-      
-      <div className="progress-section-streamer">
-        <div className="progress-bar-streamer">
-          <div
-            className="progress-bar-fill-streamer"
-            style={{ width: `${progresoHoras}%` }}
-          >
-            <span className="progress-text-streamer">{Math.floor(progresoHoras)}%</span>
+
+      <h3 className="section-title">Tus Estadísticas</h3>
+      <div className="stats-row">
+        <div className="stat-box">
+          <span className="stat-label">Nivel</span>
+          <span className="stat-value">{nivel}</span>
+        </div>
+        <div className="stat-box">
+          <span className="stat-label">Horas Totales</span>
+          <span className="stat-value">{horas}</span>
+        </div>
+        <div className="stat-box">
+          <span className="stat-label">Progreso Nivel {nivel + 1}</span>
+          <div className="mini-progress">
+            <div style={{width: `${progreso}%`}}></div>
+          </div>
+          <span className="stat-sub">{progreso}% completado</span>
+        </div>
+      </div>
+
+      {mostrarModal && (
+        <div className="modal-overlay-dashboard">
+          <div className="modal-content-dashboard">
+            <div className="modal-header">
+              <h2>🎁 Configurar Tienda</h2>
+              <button className="close-btn" onClick={() => setMostrarModal(false)}>×</button>
+            </div>
+
+            <div className="modal-body-split">
+              <div className="form-section">
+                <h3>Crear Nuevo</h3>
+                <form onSubmit={agregarRegalo}>
+                  <input 
+                    type="text" name="nombre" placeholder="Nombre (ej. Saludo)" 
+                    value={nuevoRegalo.nombre} onChange={handleInputChange} maxLength="15" required 
+                  />
+                  <div className="row-inputs">
+                    <input 
+                      type="number" name="costo" placeholder="Costo" 
+                      value={nuevoRegalo.costo} onChange={handleInputChange} required 
+                    />
+                    <input 
+                      type="number" name="xp" placeholder="XP" 
+                      value={nuevoRegalo.xp} onChange={handleInputChange} 
+                    />
+                  </div>
+                  <div className="emoji-picker">
+                    {catalogoEmojis.map(em => (
+                      <span key={em} 
+                        className={nuevoRegalo.emoji === em ? 'selected' : ''}
+                        onClick={() => setNuevoRegalo({...nuevoRegalo, emoji: em})}
+                      >{em}</span>
+                    ))}
+                  </div>
+                  <button type="submit" className="btn-save">Añadir Regalo</button>
+                </form>
+              </div>
+
+              <div className="list-section">
+                <h3>Activos ({regalos.length})</h3>
+                {regalos.length === 0 ? (
+                  <p className="empty-msg">Sin regalos configurados.</p>
+                ) : (
+                  <ul className="regalos-list">
+                    {regalos.map(r => (
+                      <li key={r.id} className="regalo-item-mini">
+                        <span className="emoji">{r.emoji}</span>
+                        <div className="info">
+                          <strong>{r.nombre}</strong>
+                          <small>🟡{r.costo} | ⚡{r.xp}</small>
+                        </div>
+                        {/* Ahora puedes borrar incluso los defaults porque están en la lista real */}
+                        <button onClick={() => eliminarRegalo(r.id)}>🗑️</button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-        <p className="remaining-streamer">
-          {horasRestantes > 0
-            ? `Faltan ${horasRestantes} horas para el siguiente nivel. ¡Planifica tus transmisiones!`
-            : `¡Has alcanzado el siguiente nivel! 🎉`}
-        </p>
-      </div>
-
-      <div className="regalos-section">
-        <h3>🎁 Regalos recibidos ({regalos.length})</h3>
-        <button onClick={agregarRegalo}>Agregar regalo</button>
-        <ul>
-          {regalos.map((r) => (
-            <li key={r.id}>{r.nombre}</li>
-          ))}
-        </ul>
-      </div>
+      )}
     </div>
   );
 }

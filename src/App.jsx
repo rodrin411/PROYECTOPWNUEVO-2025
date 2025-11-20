@@ -9,6 +9,7 @@ import ComprarMonedas from './pages/ComprarMonedas';
 import Nosotros from './pages/Nosotros';
 import Terminos from './pages/Terminos';
 import VistaTransmision from './pages/VistaTransmision';
+import StreamManager from './pages/StreamManager';
 import "./pages/PaginaPrincipal.css";
 
 
@@ -91,6 +92,10 @@ function App() {
           <Route
             path="/comprar-monedas"
             element={userData ? <ComprarMonedas /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/stream-manager"
+            element={userData ? <StreamManager /> : <Navigate to="/login" />}
           />
           <Route path="/nosotros" element={<Nosotros />} />
           <Route path="/terminos" element={<Terminos />} />
