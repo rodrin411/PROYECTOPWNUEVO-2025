@@ -241,7 +241,11 @@
     cursor: pointer;
     transition: transform 0.2s;
 }
-.boton-regalo:hover { transform: scale(1.2) rotate(10deg); }
+.boton-regalo:hover { 
+    transform: scale(1.2) rotate(10deg); 
+    background: #00ffcc;
+
+}
 
 @media (max-width: 1024px) {
     .perfil-streamer h1 {
@@ -285,3 +289,181 @@
         border-top: 2px solid #333;
     }
 }
+
+.mensaje-regalo {
+    border: 1px solid #a855f7; /* Borde morado */
+    background: rgba(168, 85, 247, 0.1) !important;
+    color: #d8b4fe;
+    font-weight: bold;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+/* --- MODAL DE REGALOS --- */
+.overlay-regalos {
+    position: fixed;
+    bottom: 80px; /* Altura suficiente para no tapar el input del chat */
+    right: 20px;  /* Pegado a la derecha (zona del chat) */
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Alinea la caja a la derecha */
+    pointer-events: none; /* PERMITE CLICS EN EL RESTO DE LA PANTALLA */
+}
+
+.modal-regalos {
+    pointer-events: auto; /* Reactivamos los clics solo para la caja */
+    background: #18181b; /* Fondo oscuro sólido */
+    width: 320px; /* Ancho fijo similar al chat */
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #333;
+    box-shadow: 0 -5px 25px rgba(0,0,0,0.6); /* Sombra hacia arriba */
+    
+    /* Animación de entrada estilo "deslizar hacia arriba" */
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    
+    margin: 0; /* Quitamos margenes antiguos */
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px) scale(0.95); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+}
+
+/* Ajuste para móviles: que ocupe el ancho inferior */
+@media (max-width: 800px) {
+    .overlay-regalos {
+        bottom: 70px;
+        right: 0;
+        left: 0; /* Ocupa todo el ancho */
+        align-items: center; /* Centrado en móvil */
+        padding: 0 10px;
+    }
+    .modal-regalos {
+        width: 100%;
+        max-width: 400px;
+    }
+}
+
+.encabezado-regalos {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 15px;
+    color: white;
+}
+.encabezado-regalos h3 { margin: 0; font-size: 1.1rem; }
+.encabezado-regalos button { background: none; border: none; color: #aaa; font-size: 1.2rem; cursor: pointer; }
+
+.saldo-disponible {
+    color: #ccc; font-size: 0.9rem; margin-bottom: 15px; text-align: center;
+}
+.saldo-disponible span { color: #eab308; font-weight: bold; }
+
+/* Grid de regalos */
+.grid-regalos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tarjeta-regalo {
+    background: #27272a;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 10px 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tarjeta-regalo:hover { background: #3f3f46; }
+
+.tarjeta-regalo.seleccionada {
+    border-color: #a855f7; 
+    background: rgba(168, 85, 247, 0.1);
+}
+
+.emoji-regalo { font-size: 1.8rem; margin-bottom: 5px; }
+.nombre-regalo { font-weight: bold; font-size: 0.85rem; color: white; }
+.costo-regalo { font-size: 0.75rem; color: #aaa; }
+.xp-regalo { font-size: 0.7rem; color: #00ffcc; font-weight: bold; margin-top: 2px; }
+
+/* Botón Enviar */
+.btn-enviar-regalo {
+    width: 100%;
+    background: #a855f7;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-enviar-regalo:disabled {
+    background: #555;
+    cursor: not-allowed;
+    color: #888;
+}
+
+.btn-enviar-regalo:not(:disabled):hover {
+    background: #9333ea;
+}
+
+.vista-error-saldo {
+    text-align: center;
+    padding: 10px;
+    animation: fadeIn 0.3s;
+}
+
+.icono-triste {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.vista-error-saldo h3 {
+    color: #ff4444; /* Rojo alerta */
+    margin-bottom: 10px;
+}
+
+.vista-error-saldo p {
+    color: #ccc;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.acciones-error {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-recargar {
+    background: #00ffcc; /* Verde Kick */
+    color: black;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.btn-recargar:hover { background: #00e6b8; }
+
+.btn-volver {
+    background: transparent;
+    color: #aaa;
+    border: 1px solid #444;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.btn-volver:hover { border-color: white; color: white; }
