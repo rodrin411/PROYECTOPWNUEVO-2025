@@ -15,6 +15,14 @@ function StreamManager() {
   const [regalosCola, setRegalosCola] = useState([]);
   const [historialEventos, setHistorialEventos] = useState([]);
 
+  // Nuevos estados para el modal de configuración
+  const [mostrarConfigStream, setMostrarConfigStream] = useState(false);
+  const [configStream, setConfigStream] = useState({
+    titulo: '',
+    categoria: 'Juegos',
+    etiquetas: ''
+  });
+
   const [mostrarResumen, setMostrarResumen] = useState(false);
   const [datosResumen, setDatosResumen] = useState({ duracion: '', horas: 0, xp: 0 });
 
@@ -26,9 +34,14 @@ function StreamManager() {
     return () => clearInterval(intervalo);
   }, [enVivo]);
 
-
-  useEffect(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; }, [mensajes]);
-  useEffect(() => { if (eventListRef.current) eventListRef.current.scrollTop = 0; }, [historialEventos]);
+  useEffect(() => { 
+    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; 
+  }, [mensajes]);
+  
+  useEffect(() => { 
+    if (eventListRef.current) eventListRef.current.scrollTop = 0; 
+  }, [historialEventos]);
+  
   useEffect(() => {
     if (!enVivo) return;
     const regalosDisponibles = usuario.regalos || []; 
@@ -63,16 +76,23 @@ function StreamManager() {
     setTimeout(() => setRegalosCola(prev => prev.filter(a => a.alertaId !== alertaId)), 4000);
   };
 
-  // --- LÓGICA DE FINALIZAR STREAM ---
+  //  INICIAR STREAM CON CONFIGURACIÓN 
+  const iniciarStream = () => {
+    if (!configStream.titulo.trim()) {
+      alert('Por favor ingresa un título para tu stream');
+      return;
+    }
+    setEnVivo(true);
+    setMostrarConfigStream(false);
+  };
+
+  // --- FINALIZAR STREAM ---
   const finalizarStream = () => {
     setEnVivo(false);
     
-    // Cada 10 segundos reales = 1 hora simulada de stream
     const horasGanadas = Math.ceil(tiempo / 10); 
     const statsActuales = usuario.estadisticasStreamer || { horasTotales: 0 };
     const nuevasHorasTotales = (statsActuales.horasTotales || 0) + horasGanadas;
-    
-    // Cálculo de nivel (ejemplo: cada 10 horas subes 1 nivel)
     const nuevoNivel = Math.floor(nuevasHorasTotales / 10) + 1;
 
     setUsuario({
@@ -91,6 +111,11 @@ function StreamManager() {
     });
 
     setMostrarResumen(true);
+    setConfigStream({
+      titulo: '',
+      categoria: 'Juegos',
+      etiquetas: ''
+    });
   };
 
   const irAlDashboard = () => {
@@ -108,7 +133,7 @@ function StreamManager() {
         </div>
         <div className="right-controls">
           {!enVivo ? (
-            <button className="btn-start" onClick={() => setEnVivo(true)}>EMITIR</button>
+            <button className="btn-start" onClick={() => setMostrarConfigStream(true)}>EMITIR</button>
           ) : (
             <button className="btn-stop" onClick={finalizarStream}>DETENER</button>
           )}
@@ -135,8 +160,18 @@ function StreamManager() {
           <div className="video-placeholder">
             {enVivo ? (
               <>
-                <div style={{position: 'absolute', top: '15px', left: '15px', background: '#ff0044', padding: '2px 8px', borderRadius: '3px', fontWeight: 'bold', fontSize: '0.7rem', color: 'white', zIndex: 5}}>EN VIVO</div>
+                <div className="live-indicator">EN VIVO</div>
                 <div className="game-screen">🎮 VISTA PREVIA</div>
+                
+                {/* PARTE INFERIOR */}
+                <div className="stream-info-overlay">
+                  <div className="stream-title">{configStream.titulo}</div>
+                  <div className="stream-meta">
+                    <span className="stream-category">{configStream.categoria}</span>
+                    <span className="stream-viewers">👁 1.2k</span>
+                  </div>
+                </div>
+
                 <div className="overlay-layer">
                   {regalosCola.map(alerta => (
                     <div key={alerta.alertaId} className="alerta-box">
@@ -150,7 +185,10 @@ function StreamManager() {
                 </div>
               </>
             ) : (
-              <div className="offline-msg"><span>⚫</span><span style={{fontSize:'0.9rem'}}>Stream Offline</span></div>
+              <div className="offline-msg">
+                <span>⚫</span>
+                <span style={{fontSize:'0.9rem'}}>Stream Offline</span>
+              </div>
             )}
           </div>
         </div>
@@ -170,9 +208,84 @@ function StreamManager() {
         </div>
       </div>
 
+      {/* MODAL DE CONFIGURACIÓN DE STREAM */}
+      {mostrarConfigStream && (
+        <div className="modal-overlay">
+          <div className="modal-config-stream">
+            <div className="modal-header">
+              <h2>🎥 Configurar Stream</h2>
+              <p>Prepara tu transmisión antes de salir en vivo</p>
+            </div>
+
+            <div className="config-form">
+              <div className="form-group">
+                <label>Título del Stream</label>
+                <input
+                  type="text"
+                  placeholder="Ej: Jugando Fortnite con la comunidad - ¡Sígueme!"
+                  value={configStream.titulo}
+                  onChange={(e) => setConfigStream({...configStream, titulo: e.target.value})}
+                  maxLength={100}
+                />
+                <div className="char-count">{configStream.titulo.length}/100</div>
+              </div>
+
+              <div className="form-group">
+                <label>Categoría</label>
+                <select 
+                  value={configStream.categoria}
+                  onChange={(e) => setConfigStream({...configStream, categoria: e.target.value})}
+                >
+                  <option value="Juegos">🎮 Juegos</option>
+                  <option value="Música">🎵 Música</option>
+                  <option value="Charla">💬 Charla</option>
+                  <option value="Deportes">⚽ Deportes</option>
+                  <option value="Arte">🎨 Arte</option>
+                  <option value="Programación">💻 Programación</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Etiquetas (opcional)</label>
+                <input
+                  type="text"
+                  placeholder="Ej: fortnite, español, diversión"
+                  value={configStream.etiquetas}
+                  onChange={(e) => setConfigStream({...configStream, etiquetas: e.target.value})}
+                />
+              </div>
+
+              <div className="preview-card">
+                <div className="preview-label">Vista previa:</div>
+                <div className="preview-content">
+                  <div className="preview-title">{configStream.titulo || "Tu título aparecerá aquí"}</div>
+                  <div className="preview-category">{configStream.categoria}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-actions">
+              <button 
+                className="btn-cancel"
+                onClick={() => setMostrarConfigStream(false)}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="btn-start-stream"
+                onClick={iniciarStream}
+                disabled={!configStream.titulo.trim()}
+              >
+                🎬 Iniciar Transmisión
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODAL DE RESUMEN */}
       {mostrarResumen && (
-        <div className="modal-resumen-overlay">
+        <div className="modal-overlay">
           <div className="modal-resumen">
             <h2>Stream Finalizado</h2>
             <p className="subtitulo">¡Buen trabajo hoy! Aquí tienes tus estadísticas.</p>
@@ -198,7 +311,6 @@ function StreamManager() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
