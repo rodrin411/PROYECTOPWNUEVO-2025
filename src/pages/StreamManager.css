@@ -51,7 +51,6 @@
   overflow: hidden;
 }
 
-/* 1. PANEL IZQUIERDO (NUEVO: EVENT FEED) */
 .left-dock {
   width: 250px;
   background: #0e0e10;
@@ -76,7 +75,6 @@
   padding: 10px;
 }
 
-/* Tarjeta de evento en el historial */
 .event-card {
   background: #18181b;
   border-left: 3px solid #a855f7; 
@@ -128,7 +126,7 @@
   backdrop-filter: blur(5px);
   border: 1px solid #a855f7;
   box-shadow: 0 4px 20px rgba(168, 85, 247, 0.25);
-  border-radius: 50px; /* Forma de píldora */
+  border-radius: 50px; 
   padding: 8px 25px;
   display: flex;
   align-items: center;
