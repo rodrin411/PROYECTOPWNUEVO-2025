@@ -141,7 +141,7 @@ function StreamManager() {
       </header>
 
       <div className="workspace-obs">
-        {/* IZQUIERDA: ACTIVIDAD */}
+        {/* ACTIVIDAD */}
         <div className="left-dock">
           <div className="dock-title">🔔 Actividad Reciente</div>
           <div className="event-list" ref={eventListRef}>
@@ -155,7 +155,7 @@ function StreamManager() {
           </div>
         </div>
 
-        {/* CENTRO: PREVIEW */}
+        {/* PREVIEW */}
         <div className="preview-area">
           <div className="video-placeholder">
             {enVivo ? (
@@ -193,7 +193,7 @@ function StreamManager() {
           </div>
         </div>
 
-        {/* DERECHA: CHAT */}
+        {/* CHAT */}
         <div className="side-dock">
           <div className="dock-title">💬 Chat del Stream</div>
           <div className="chat-feed" ref={chatRef}>
