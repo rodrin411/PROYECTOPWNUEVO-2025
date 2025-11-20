@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useOutletContext, useLocation } from 'react-router-dom';
+import { useParams, useOutletContext, useLocation, useNavigate } from 'react-router-dom';
 import './VistaTransmision.css';
 
 function VistaTransmision() {
   const { usuario, setUsuario } = useOutletContext();
   const ubicacion = useLocation();
   const referenciaChat = useRef(null);
+  const navigate = useNavigate();
   
   const datosTransmision = ubicacion.state || {
      titulo: "Transmisión Desconocida",
@@ -17,9 +18,20 @@ function VistaTransmision() {
     { id: 2, autor: 'Fanatico123', nivel: 5, texto: '¡Hola a todos!', esMod: false },
   ]);
   const [nuevoMensaje, setNuevoMensaje] = useState("");
-  
-  // Estado para la notificación flotante
   const [notificacionNivel, setNotificacionNivel] = useState(null);
+  const [mostrarModalRegalos, setMostrarModalRegalos] = useState(false);
+  const [regaloSeleccionado, setRegaloSeleccionado] = useState(null);
+  const [errorSaldo, setErrorSaldo] = useState(false);
+
+  // Catálogo de Regalos
+  const catalogoRegalos = [
+      { id: 1, nombre: 'Like', costo: 10, xp: 5, emoji: '👍' },
+      { id: 2, nombre: 'Corazón', costo: 20, xp: 10, emoji: '❤️' },
+      { id: 3, nombre: 'Aplausos', costo: 30, xp: 15, emoji: '👏' },
+      { id: 4, nombre: 'Estrella', costo: 50, xp: 25, emoji: '⭐' },
+      { id: 5, nombre: 'Fuego', costo: 100, xp: 60, emoji: '🔥' },
+      { id: 6, nombre: 'Corona', costo: 500, xp: 300, emoji: '👑' },
+  ];
 
   useEffect(() => {
       if(referenciaChat.current) {
@@ -27,9 +39,74 @@ function VistaTransmision() {
       }
   }, [mensajes]);
 
-  // --- LÓGICA DE MATEMÁTICA (Igual al Perfil) ---
   const calcularTechoNivel = (n) => (10 * n * (n + 1)) / 2;
 
+  // --- FUNCIÓN ENVIAR REGALO  ---
+  const enviarRegalo = () => {
+      if (!regaloSeleccionado) return;
+      if (!usuario) return alert("Inicia sesión para enviar regalos");
+
+      if (usuario.monedas < regaloSeleccionado.costo) {
+          setErrorSaldo(true); 
+          return;
+      }
+
+      // Lógica de Niveles
+      const nivelActual = usuario.nivel || 1;
+      const puntosActuales = usuario.puntos || 0;
+      
+      const monedasRestantes = usuario.monedas - regaloSeleccionado.costo;
+      const nuevosPuntos = puntosActuales + regaloSeleccionado.xp;
+      
+      let nuevoNivelCalculado = nivelActual;
+
+      //Mientras tengas puntos, sigue subiendo
+      while (nuevosPuntos >= calcularTechoNivel(nuevoNivelCalculado)) {
+          nuevoNivelCalculado++;
+      }
+
+      let huboSubidaDeNivel = nuevoNivelCalculado > nivelActual;
+
+      // Mensaje en el Chat
+      const mensajeRegalo = {
+          id: Date.now(),
+          autor: usuario.nombre,
+          nivel: nuevoNivelCalculado, 
+          texto: `ha enviado un regalo: ${regaloSeleccionado.nombre} ${regaloSeleccionado.emoji}`,
+          esYo: true,
+          esRegalo: true 
+      };
+
+      setMensajes([...mensajes, mensajeRegalo]);
+
+      // Actualizar Usuario Global
+      setUsuario({ 
+          ...usuario, 
+          monedas: monedasRestantes,
+          puntos: nuevosPuntos,
+          nivel: nuevoNivelCalculado
+      });
+
+      if (huboSubidaDeNivel) {
+          setNotificacionNivel(nuevoNivelCalculado);
+          setTimeout(() => setNotificacionNivel(null), 4000);
+      }
+      
+      setMostrarModalRegalos(false);
+      setRegaloSeleccionado(null);
+  };
+
+  const cerrarModal = () => {
+      setMostrarModalRegalos(false);
+      setRegaloSeleccionado(null);
+      setErrorSaldo(false);
+  };
+
+  const irATienda = () => {
+      navigate('/comprar-monedas');
+  };
+
+  // --- FUNCIÓN ENVIAR MENSAJE  ---
   const enviarMensaje = (e) => {
     e.preventDefault();
     if (!nuevoMensaje.trim()) return;
@@ -37,40 +114,33 @@ function VistaTransmision() {
 
     const nivelActual = usuario.nivel || 1;
     const puntosActuales = usuario.puntos || 0;
-    
-    // Sumamos el punto hipotético
     const nuevosPuntos = puntosActuales + 1;
-    const techoNivelActual = calcularTechoNivel(nivelActual);
+    
+    let nuevoNivelCalculado = nivelActual;
 
-    let nivelParaElMensaje = nivelActual;
-    let huboSubidaDeNivel = false;
-
-    // Verificamos si con este mensaje subimos de nivel
-    if (nuevosPuntos >= techoNivelActual) {
-        nivelParaElMensaje = nivelActual + 1; 
-        huboSubidaDeNivel = true;
+    while (nuevosPuntos >= calcularTechoNivel(nuevoNivelCalculado)) {
+        nuevoNivelCalculado++;
     }
 
-    // 2. AGREGAMOS EL MENSAJE (Usando el nivel calculado)
+    let huboSubidaDeNivel = nuevoNivelCalculado > nivelActual;
+
     setMensajes([...mensajes, {
         id: Date.now(),
         autor: usuario.nombre,
-        nivel: nivelParaElMensaje, 
+        nivel: nuevoNivelCalculado, 
         texto: nuevoMensaje,
         esYo: true
     }]);
     setNuevoMensaje("");
 
-    // ACTUALIZAMOS EL ESTADO GLOBAL
     setUsuario({ 
         ...usuario, 
-        puntos: nuevosPuntos,
-        nivel: nivelParaElMensaje
+        puntos: nuevosPuntos, 
+        nivel: nuevoNivelCalculado 
     });
 
     if (huboSubidaDeNivel) {
-        setNotificacionNivel(nivelParaElMensaje);
-        // Ocultar después de 4 segundos
+        setNotificacionNivel(nuevoNivelCalculado);
         setTimeout(() => setNotificacionNivel(null), 4000);
     }
   };
@@ -103,15 +173,11 @@ function VistaTransmision() {
       <aside className="barra-lateral-chat">
          <div className="encabezado-chat">Chat de la transmisión</div>
          
-         {notificacionNivel && (
-             <div className="alerta-nivel-flotante">
-                 🎉 ¡Nivel {notificacionNivel} alcanzado!
-             </div>
-         )}
+         {notificacionNivel && <div className="alerta-nivel-flotante">🎉 ¡Nivel {notificacionNivel} alcanzado!</div>}
 
          <div className="caja-mensajes" ref={referenciaChat}>
             {mensajes.map(msg => (
-                <div key={msg.id} className={`fila-mensaje ${msg.esYo ? 'propio' : ''}`}>
+                <div key={msg.id} className={`fila-mensaje ${msg.esYo ? 'propio' : ''} ${msg.esRegalo ? 'mensaje-regalo' : ''}`}>
                     <span className="insignia-nivel">{msg.nivel}</span>
                     <span className="autor-mensaje" style={{color: msg.esMod ? '#00ffcc' : (msg.esYo ? '#00ffcc' : '#bbb')}}>
                         {msg.autor}:
@@ -122,17 +188,68 @@ function VistaTransmision() {
          </div>
          
          <form className="area-input-chat" onSubmit={enviarMensaje}>
-            <input 
-                value={nuevoMensaje} 
-                onChange={e => setNuevoMensaje(e.target.value)} 
-                placeholder="Enviar mensaje..."
-            />
+            <input value={nuevoMensaje} onChange={e => setNuevoMensaje(e.target.value)} placeholder="Enviar mensaje..." />
             <div className="pie-chat">
                 <span className="mis-puntos">🏆 {usuario?.puntos || 0}</span>
-                <button type="button" className="boton-regalo">🎁</button>
+                <button type="button" className="boton-regalo" onClick={() => setMostrarModalRegalos(true)}>🎁</button>
             </div>
          </form>
       </aside>
+
+      {/* --- MODAL DE REGALOS --- */}
+      {mostrarModalRegalos && (
+          <div className="overlay-regalos">
+              <div className="modal-regalos">
+                  {!errorSaldo ? (
+                    <>
+                        <div className="encabezado-regalos">
+                            <h3>🎁 Enviar un regalo</h3>
+                            <button onClick={cerrarModal}>✕</button>
+                        </div>
+                        
+                        <p className="saldo-disponible">Monedas disponibles: <span>{usuario?.monedas || 0} 🟡</span></p>
+
+                        <div className="grid-regalos">
+                            {catalogoRegalos.map(regalo => (
+                                <div 
+                                    key={regalo.id} 
+                                    className={`tarjeta-regalo ${regaloSeleccionado?.id === regalo.id ? 'seleccionada' : ''}`}
+                                    onClick={() => setRegaloSeleccionado(regalo)}
+                                >
+                                    <div className="emoji-regalo">{regalo.emoji}</div>
+                                    <div className="nombre-regalo">{regalo.nombre}</div>
+                                    <div className="costo-regalo">{regalo.costo}</div>
+                                    <div className="xp-regalo">+{regalo.xp} XP</div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <button 
+                            className="btn-enviar-regalo" 
+                            disabled={!regaloSeleccionado}
+                            onClick={enviarRegalo}
+                        >
+                            Enviar Regalo
+                        </button>
+                    </>
+                  ) : (
+                    <div className="vista-error-saldo">
+                        <div className="icono-triste">😓</div>
+                        <h3>Saldo Insuficiente</h3>
+                        <p>
+                            Te faltan monedas para enviar este regalo.
+                            <br/>
+                            ¿Quieres recargar ahora?
+                        </p>
+                        <div className="acciones-error">
+                            <button className="btn-recargar" onClick={irATienda}>Ir a Tienda 🛒</button>
+                            <button className="btn-volver" onClick={() => setErrorSaldo(false)}>Volver</button>
+                        </div>
+                    </div>
+                  )}
+              </div>
+          </div>
+      )}
     </div>
   );
 }
