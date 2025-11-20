@@ -1,87 +1,225 @@
-/* Este es el CSS para Register, es idéntico al de Login */
-/* pero usa ".register-container" */
+.contenedor-auth {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0b0b0e;
+  background-image: 
+    radial-gradient(circle at 85% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 25%),
+    radial-gradient(circle at 15% 80%, rgba(0, 255, 204, 0.05) 0%, transparent 25%);
+  padding: 20px;
+}
 
-.register-container {
+.tarjeta-auth {
+  background: #121212;
+  width: 100%;
+  max-width: 480px; /* Un poco más ancho que el login */
+  padding: 40px;
+  border-radius: 16px;
+  border: 1px solid #222;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+  animation: deslizarArriba 0.5s ease-out;
+}
+
+@keyframes deslizarArriba {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Encabezado */
+.encabezado-auth {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.logo {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: white;
+  letter-spacing: -1px;
+}
+
+.logo span {
+  color: #00ffcc;
+  text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+}
+
+.encabezado-auth h1 {
+  color: white;
+  margin: 10px 0;
+  font-size: 1.6rem;
+}
+
+.encabezado-auth p {
+  color: #888;
+  font-size: 0.95rem;
+}
+
+/* Formulario */
+.formulario-auth {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #3a0ca3, #7209b7, #f72585);
+  gap: 18px;
+}
+
+.grupo-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.etiqueta-input {
+  color: #ccc;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.grupo-input input {
+  width: 100%;
+  padding: 14px;
+  background: #1a1a1d;
+  border: 1px solid #333;
+  border-radius: 8px;
   color: white;
-  padding: 20px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
+}
+
+/* Estilo específico para selector de fecha oscuro */
+input[type="date"] {
+  color-scheme: dark;
+  color: #ddd;
+}
+
+.grupo-input input:focus {
+  border-color: #a855f7; /* Morado para registro para diferenciar sutilmente */
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+  background: #202023;
+}
+
+.grupo-input input::placeholder {
+  color: #555;
+}
+
+.pista-contraseña {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 4px;
+  margin-left: 4px;
+}
+
+/* Acuerdo de términos */
+.acuerdo-terminos {
+  font-size: 0.85rem;
+  color: #888;
+  line-height: 1.4;
+  margin: 5px 0;
   text-align: center;
 }
 
-.register-container h2 {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  letter-spacing: 1px;
-}
-
-form {
-  background-color: rgba(255, 255, 255, 0.1);
-  padding: 2rem;
-  border-radius: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  width: 90%;
-  max-width: 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-input,
-select {
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  outline: none;
-  font-size: 1rem;
-  color: #333;
-}
-
-button {
-  padding: 12px;
-  background-color: #f72585;
-  border: none;
-  border-radius: 10px;
-  color: white;
+.enlace-terminos {
+  color: #a855f7;
+  text-decoration: none;
   font-weight: bold;
+}
+
+.enlace-terminos:hover {
+  text-decoration: underline;
+  color: #d8b4fe;
+}
+
+/* Botones y Errores */
+.boton-enviar {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(90deg, #00ffcc, #00e6b8);
+  color: black;
+  border: none;
+  border-radius: 8px;
   font-size: 1rem;
+  font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s;
+  margin-top: 10px;
 }
 
-button:hover {
-  background-color: #b5179e;
+.boton-enviar:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 255, 204, 0.3);
 }
 
-/* Para el mensaje de error */
-.error-msg {
-  color: #ffadad;
-  background-color: rgba(255, 0, 0, 0.2);
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ff5959;
-  font-weight: 500;
+.boton-enviar:disabled {
+  background: #444;
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* Animación de carga sutil en el botón */
+.boton-enviar.cargando {
+  position: relative;
+  color: transparent;
+}
+.boton-enviar.cargando::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 20px; height: 20px;
+  border: 2px solid black;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: girar 1s linear infinite;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes girar { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+.mensaje-error {
+  background: rgba(255, 68, 68, 0.1);
+  border: 1px solid #ff4444;
+  color: #ff4444;
+  padding: 12px;
+  border-radius: 8px;
   font-size: 0.9rem;
+  text-align: center;
+  animation: sacudir 0.3s;
 }
 
-/* Media query */
-@media (max-width: 600px) {
-  .register-container h2 {
-    font-size: 1.5rem;
-  }
+@keyframes sacudir {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
 
-  form {
-    padding: 1.5rem;
-    width: 100%;
-  }
+/* Pie de página */
+.pie-auth {
+  margin-top: 25px;
+  text-align: center;
+  color: #888;
+  font-size: 0.9rem;
+  border-top: 1px solid #222;
+  padding-top: 20px;
+}
 
-  input,
-  select,
-  button {
-    font-size: 0.9rem;
+.enlace-auth {
+  color: #00ffcc;
+  text-decoration: none;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.enlace-auth:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .tarjeta-auth {
+    padding: 25px;
+  }
+  .logo {
+    font-size: 1.8rem;
   }
 }

@@ -1,180 +1,168 @@
 .dashboard-container {
-  padding: 2rem;
-  color: #f5f5f5;
-  background: linear-gradient(135deg, #121212, #1e1e1e);
-  min-height: 100vh;
-  text-align: center;
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: white;
+  min-height: 80vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.dashboard-container h2 {
-  color: #90fc86;
-  margin-bottom: 1rem;
-}
+.welcome-banner h1 { font-size: 2.5rem; margin-bottom: 5px; color: white; }
+.welcome-banner p { color: #aaa; font-size: 1.1rem; margin-bottom: 40px; }
 
-.dashboard-container p {
-  color: #ccc;
-  font-size: 1rem;
-}
-
-.dashboard-grid {
+/* TARJETAS DE ACCIÓN */
+.actions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 50px;
 }
 
-.stat-card {
-  background-color: #2a2a2a;
-  border-radius: 10px;
-  padding: 1.5rem;
-  border: 1px solid #444;
-  text-align: center;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-}
-
-.stat-card-icon {
-  font-size: 2.5rem;
-}
-
-.stat-card-value {
-  font-size: 2.2rem;
-  font-weight: bold;
-  margin: 0.5rem 0;
-  color: #90fc86;
-}
-
-.stat-card-label {
-  font-size: 1rem;
-  color: #aaa;
-}
-
-.stat-card button {
-  background-color: #90fc86;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  margin-top: 0.8rem;
-  border-radius: 6px;
+.action-card {
+  background: #18181b;
+  border: 1px solid #333;
+  border-radius: 15px;
+  padding: 30px;
   cursor: pointer;
-  font-weight: bold;
-  color: #121212;
-  transition: background-color 0.3s ease;
-}
-
-.stat-card button:hover {
-  background-color: #6adf63;
-}
-
-.regalos-section {
-  margin-top: 3rem;
-  text-align: left;
-  max-width: 600px;
-  margin-inline: auto;
-}
-
-.regalos-section h3 {
-  color: #90fc86;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-.regalos-section button {
-  background-color: #03dac6;
-  border: none;
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  color: #121212;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  transition: background-color 0.3s ease;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.regalos-section button:hover {
-  background-color: #01b8a2;
-}
-
-.regalos-section ul {
-  list-style: none;
-  padding: 0;
-}
-
-.regalos-section li {
-  background-color: #333;
-  padding: 0.8rem 1rem;
-  border-radius: 5px;
-  margin-bottom: 0.5rem;
-  color: #f5f5f5;
-}
-
-.progress-section-streamer {
-  margin-top: 2rem;
-  text-align: center;
-}
-
-.progress-bar-streamer {
-  width: 100%;
-  height: 15px;
-  background-color: #2b2b2b;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.6);
-  margin-bottom: 0.5rem;
-}
-
-.progress-bar-fill-streamer {
-  height: 100%;
-  background: linear-gradient(90deg, #90fc86, #4de27a);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: width 0.4s ease-in-out;
+  transition: all 0.2s;
   position: relative;
+  overflow: hidden;
 }
 
-.progress-text-streamer {
-  color: #121212;
-  font-weight: bold;
-  font-size: 0.9rem;
+.action-card:hover { transform: translateY(-5px); border-color: #00ffcc; }
+.action-card.secondary:hover { border-color: #a855f7; }
+
+.icon-circle {
+  font-size: 2.5rem; margin-bottom: 15px;
+  background: #222; width: 60px; height: 60px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
 }
 
-.remaining-streamer {
-  font-size: 0.9rem;
-  color: #a0a0a0;
-}
+.action-card h3 { margin: 0 0 10px 0; color: white; font-size: 1.5rem; }
+.action-card p { color: #aaa; margin-bottom: 20px; height: 40px; }
 
-.overlay-streamer {
-  position: fixed;
-  top: 0; 
-  left: 0;
-  width: 100%; 
-  height: 100%;
-  background: rgba(0,0,0,0.7);
-  color: #fff;
-  font-size: 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.btn-action {
+  background: white; color: black; border: none;
+  padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;
+  width: 100%;
+  transition: background 0.2s;
+}
+.btn-action:hover { background: #ddd; }
+.btn-action.outline { background: transparent; border: 1px solid white; color: white; }
+.btn-action.outline:hover { background: rgba(255,255,255,0.1); }
+
+
+.section-title { color: #00ffcc; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+.stats-row { display: flex; gap: 20px; flex-wrap: wrap; }
+
+.stat-box {
+  flex: 1; background: #111; padding: 20px; border-radius: 10px;
+  border-left: 4px solid #333; min-width: 200px;
+}
+.stat-box:nth-child(1) { border-color: #00ffcc; }
+.stat-box:nth-child(2) { border-color: #ff0055; }
+.stat-box:nth-child(3) { border-color: #a855f7; }
+
+.stat-label { display: block; color: #aaa; margin-bottom: 5px; }
+.stat-value { font-size: 2rem; font-weight: bold; color: white; }
+.stat-sub { font-size: 0.8rem; color: #666; }
+
+.mini-progress {
+  height: 6px; background: #333; border-radius: 3px; margin: 10px 0; overflow: hidden;
+}
+.mini-progress div { height: 100%; background: #a855f7; }
+
+.modal-overlay-dashboard {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex; align-items: center; justify-content: center;
   z-index: 1000;
-  animation: fadeOut 2.5s forwards;
+  backdrop-filter: blur(5px);
 }
 
-@keyframes fadeOut {
-  0% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { opacity: 0; visibility: hidden; }
+.modal-content-dashboard {
+  background: #18181b;
+  width: 90%; max-width: 800px;
+  border-radius: 12px; border: 1px solid #333;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  color: white;
+  animation: fadeIn 0.3s ease-out;
 }
 
-@media (max-width: 600px) {
-  .stat-card-value { font-size: 1.6rem; }
-  .stat-card-icon { font-size: 2rem; }
-  .dashboard-container { padding: 1.2rem; }
-  .regalos-section { width: 90%; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;
+}
+.modal-header h2 { margin: 0; color: #fff; }
+.close-btn { background: none; border: none; color: #aaa; font-size: 2rem; cursor: pointer; }
+.close-btn:hover { color: white; }
+
+.modal-body-split {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+}
+
+/* FORMULARIO */
+.form-section input {
+  width: 100%; background: #222; border: 1px solid #444;
+  padding: 12px; color: white; border-radius: 6px; margin-bottom: 10px;
+  outline: none;
+}
+.form-section input:focus { border-color: #00ffcc; }
+
+.row-inputs { display: flex; gap: 10px; }
+.emoji-picker {
+  display: flex; gap: 8px; flex-wrap: wrap; margin: 15px 0;
+  background: #222; padding: 10px; border-radius: 6px;
+}
+.emoji-picker span { 
+  cursor: pointer; padding: 5px; border-radius: 4px; font-size: 1.4rem; 
+  transition: transform 0.2s;
+}
+.emoji-picker span:hover { transform: scale(1.2); background: #333; }
+.emoji-picker span.selected { background: #00ffcc; transform: scale(1.1); }
+
+.btn-save {
+  width: 100%; background: #00ffcc; color: black; border: none;
+  padding: 12px; font-weight: bold; border-radius: 6px; cursor: pointer;
+  font-size: 1rem; transition: background 0.2s;
+}
+.btn-save:hover { background: #00e6b8; }
+
+/* LISTA */
+.list-section { 
+  background: #111; padding: 15px; border-radius: 8px; 
+  max-height: 400px; overflow-y: auto; 
+  border: 1px solid #333;
+}
+.list-section h3 { margin-top: 0; color: #aaa; font-size: 1rem; margin-bottom: 10px; }
+
+.regalos-list { list-style: none; padding: 0; margin: 0; }
+.regalo-item-mini {
+  display: flex; align-items: center; gap: 15px;
+  background: #222; padding: 10px; margin-bottom: 8px; border-radius: 6px;
+  border: 1px solid transparent;
+}
+.regalo-item-mini:hover { border-color: #444; }
+
+.regalo-item-mini .emoji { font-size: 1.5rem; }
+.regalo-item-mini .info { flex: 1; display: flex; flex-direction: column; }
+.regalo-item-mini .info strong { color: white; }
+.regalo-item-mini .info small { color: #888; }
+.regalo-item-mini button { 
+  background: transparent; border: none; cursor: pointer; font-size: 1.2rem;
+  opacity: 0.5; transition: opacity 0.2s;
+}
+.regalo-item-mini button:hover { opacity: 1; }
+
+.empty-msg { color: #555; text-align: center; margin-top: 20px; font-style: italic; }
+
+@media (max-width: 768px) {
+  .modal-body-split { grid-template-columns: 1fr; }
 }
