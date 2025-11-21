@@ -39,7 +39,7 @@ function VistaTransmision() {
     { id: 6, nombre: 'Corona', costo: 500, xp: 300, emoji: '👑' },
   ];
 
-  // --- 1. CONEXIÓN CON EL BACKEND (SOCKET) ---
+  // --- 1. CONEXIÓN CON EL BACKEND ---
   useEffect(() => {
     // Conectar al servidor (puerto 3000)
     const nuevoSocket = io('http://localhost:3000');
@@ -48,7 +48,7 @@ function VistaTransmision() {
     // Unirse a la sala específica de este stream
     nuevoSocket.emit('unirse_stream', streamId);
 
-    // A) Escuchar mensajes que llegan del servidor
+    // A) Escuchar mensajes REALES que llegan del servidor
     nuevoSocket.on('recibir_mensaje', (msj) => {
       setMensajes((prev) => [
         ...prev.slice(-49), // Mantener solo los últimos 50
@@ -69,7 +69,6 @@ function VistaTransmision() {
             puntos: data.nuevosPuntos 
          };
          
-         // Si subió de nivel, mostrar notificación
          if (data.nuevoNivel > usuario.nivel) {
             setNotificacionNivel(data.nuevoNivel);
             setTimeout(() => setNotificacionNivel(null), 4000);
@@ -80,10 +79,33 @@ function VistaTransmision() {
        }
     });
 
-    // Limpieza al salir de la página
     return () => nuevoSocket.disconnect();
-  }, [streamId, usuario?.nombre]); // Se reconecta si cambia el usuario o el stream
+  }, [streamId, usuario?.nombre]); 
 
+  // --- 2. SIMULACIÓN DE CHAT  ---
+  useEffect(() => {
+    const loop = setInterval(() => {
+      if (Math.random() < 0.3) {
+        const users = ["Viewer1", "GamerPro", "Fan_Kick", "Troll99", "Anonimo", "Bot_Support"];
+        const texts = ["Hola!", "GG", "Que pro", "Juega otra cosa", "Saludame!", "lol", "POG", "F", "Increíble stream"];
+        
+        const nuevoBot = {
+            id: Date.now() + Math.random(),
+            autor: users[Math.floor(Math.random() * users.length)],
+            nivel: Math.floor(Math.random() * 40) + 1, 
+            texto: texts[Math.floor(Math.random() * texts.length)],
+            esYo: false,
+            esMod: Math.random() > 0.95
+        };
+
+        setMensajes(prev => [...prev.slice(-49), nuevoBot]);
+      }
+    }, 2500);
+
+    return () => clearInterval(loop);
+  }, []);
+
+  // Scroll automático
   useEffect(() => {
     if(referenciaChat.current) {
       referenciaChat.current.scrollTop = referenciaChat.current.scrollHeight;
@@ -91,13 +113,13 @@ function VistaTransmision() {
   }, [mensajes]);
 
 
-  // --- 2. ENVIAR MENSAJE ---
+  // --- 3. FUNCIONES DE ENVÍO (AL BACKEND) ---
   const enviarMensaje = (e) => {
     e.preventDefault();
     if (!nuevoMensaje.trim()) return;
     if (!usuario) return alert("Inicia sesión para chatear");
 
-    // Emitir evento al servidor
+    // Emitir evento al servidor real
     socket.emit('enviar_mensaje', {
       usuarioId: usuario.id,
       nombre: usuario.nombre,
@@ -108,18 +130,15 @@ function VistaTransmision() {
     setNuevoMensaje("");
   };
 
-  // --- 3. ENVIAR REGALO ---
   const enviarRegalo = () => {
     if (!regaloSeleccionado) return;
     if (!usuario) return alert("Inicia sesión para enviar regalos");
 
-    // Validación visual rápida
     if (usuario.monedas < regaloSeleccionado.costo) {
       setErrorSaldo(true); 
       return;
     }
 
-    // Emitir evento de regalo al servidor
     socket.emit('enviar_regalo', {
       usuarioId: usuario.id,
       streamId: streamId,
@@ -146,7 +165,6 @@ function VistaTransmision() {
         <div className="reproductor-video">
            <div className="indicador-vivo">EN VIVO</div>
            <div className="boton-reproducir">▶</div>
-           {/* Overlay de regalo */}
         </div>
 
         <div className="barra-info-transmision">
@@ -169,7 +187,6 @@ function VistaTransmision() {
       <aside className="barra-lateral-chat">
          <div className="encabezado-chat">Chat de la transmisión</div>
          
-         {/* Notificación de Nivel */}
          {notificacionNivel && <div className="alerta-nivel-flotante">🎉 ¡Nivel {notificacionNivel} alcanzado!</div>}
 
          <div className="caja-mensajes" ref={referenciaChat}>
@@ -204,7 +221,6 @@ function VistaTransmision() {
          </form>
       </aside>
 
-      {/* --- MODAL DE REGALOS --- */}
       {mostrarModalRegalos && (
           <div className="overlay-regalos">
               <div className="modal-regalos">

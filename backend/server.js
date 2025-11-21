@@ -91,15 +91,15 @@ io.on('connection', (socket) => {
 
 // --- RUTAS API (ENDPOINTS) ---
 
-// 1. REGISTRO
+// 1. REGISTRO 
 app.post('/api/register', async (req, res) => {
-  console.log("📥 Petición de Registro recibida:", req.body.email);
+  console.log("📥 Petición de Registro:", req.body.email);
   try {
-    const { nombre, email, password, rol, fechaNacimiento } = req.body;
+    const { nombre, email, password, fechaNacimiento } = req.body; // SIN ROL
 
+    // Validaciones de existencia...
     const existeEmail = await db.Usuario.findOne({ where: { email } });
     if (existeEmail) return res.status(400).json({ error: "El email ya existe" });
-
     const existeNombre = await db.Usuario.findOne({ where: { nombre } });
     if (existeNombre) return res.status(400).json({ error: "El nombre ya está en uso" });
 
@@ -109,41 +109,26 @@ app.post('/api/register', async (req, res) => {
       nombre,
       email,
       password: hashedPassword,
-      rol: rol || 'espectador',
+      rol: 'espectador', // POR DEFECTO
       saldo: 500,
       nivel: 1,
       puntos: 0,
       avatarUrl: "https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
     });
 
-    console.log("✅ Usuario creado:", nuevoUsuario.id);
-    
-    // CAMBIO AQUÍ: Construimos la respuesta manual
-    res.json({ 
-        mensaje: "Usuario creado", 
-        usuario: {
-            id: nuevoUsuario.id,
-            nombre: nuevoUsuario.nombre,
-            email: nuevoUsuario.email,
-            rol: nuevoUsuario.rol,
-            monedas: nuevoUsuario.saldo, // <--- AQUÍ ESTÁ LA MAGIA
-            nivel: nuevoUsuario.nivel,
-            puntos: nuevoUsuario.puntos,
-            avatarUrl: nuevoUsuario.avatarUrl
-        }
-    });
+    res.json({ mensaje: "Usuario creado", usuario: { ...nuevoUsuario.dataValues, monedas: nuevoUsuario.saldo } });
 
   } catch (error) {
-    console.error("❌ Error en registro:", error);
+    console.error("❌ Error registro:", error);
     res.status(500).json({ error: "Error en el servidor" });
   }
 });
 
 // 2. LOGIN
 app.post('/api/login', async (req, res) => {
-  console.log("📥 Petición de Login recibida:", req.body.email);
+  console.log("📥 Petición de Login:", req.body.email);
   try {
-    const { email, password } = req.body;
+    const { email, password, rolElegido } = req.body; // RECIBIMOS EL ROL DESEADO
 
     const usuario = await db.Usuario.findOne({ 
       where: db.Sequelize.or({ email: email }, { nombre: email }) 
@@ -154,17 +139,20 @@ app.post('/api/login', async (req, res) => {
     const validPassword = await bcrypt.compare(password, usuario.password);
     if (!validPassword) return res.status(401).json({ error: "Contraseña incorrecta" });
 
+    // --- TRUCO: ACTUALIZAMOS EL ROL AL QUE ELIGIÓ EL USUARIO ---
+    if (rolElegido) {
+        await usuario.update({ rol: rolElegido });
+    }
+    // ------------------------------------------------------------
+
     res.json({
       mensaje: "Login exitoso",
       usuario: {
         id: usuario.id,
         nombre: usuario.nombre,
         email: usuario.email,
-        rol: usuario.rol,
-        
-        // CAMBIO AQUÍ: Enviamos 'saldo' pero le ponemos la etiqueta 'monedas'
-        monedas: usuario.saldo, 
-        
+        rol: rolElegido || usuario.rol, // Devolvemos el nuevo rol
+        monedas: usuario.saldo,
         nivel: usuario.nivel,
         puntos: usuario.puntos,
         avatarUrl: usuario.avatarUrl

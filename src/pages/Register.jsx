@@ -8,8 +8,7 @@ function Register() {
     email: "",
     contraseña: "",
     confirmarContraseña: "",
-    fechaNacimiento: "",
-    rol: "espectador"
+    fechaNacimiento: ""
   });
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
@@ -22,19 +21,47 @@ function Register() {
     });
   };
 
+  // 1. VALIDACIÓN
+  const validarFormulario = () => {
+    // Validar contraseña
+    if (datosFormulario.contraseña.length < 6) {
+      throw new Error("La contraseña debe tener al menos 6 caracteres");
+    }
+    
+    if (datosFormulario.contraseña !== datosFormulario.confirmarContraseña) {
+      throw new Error("Las contraseñas no coinciden");
+    }
+
+    if (!datosFormulario.email.includes('@')) {
+      throw new Error("Por favor ingresa un email válido");
+    }
+
+    // Calcular edad
+    const fechaNacimiento = new Date(datosFormulario.fechaNacimiento);
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+    const mes = hoy.getMonth() - fechaNacimiento.getMonth();
+    
+    if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
+        edad--;
+    }
+    
+    // Validar 13 años
+    if (edad < 13) {
+      throw new Error("Debes tener al menos 13 años para registrarte");
+    }
+  };
+
   const manejarRegistro = async (e) => {
     e.preventDefault();
     setCargando(true);
     setError("");
 
-    if (datosFormulario.contraseña !== datosFormulario.confirmarContraseña) {
-        setError("Las contraseñas no coinciden");
-        setCargando(false);
-        return;
-    }
-
     try {
-      // CONEXIÓN AL BACKEND
+      // 2. EJECUTAMOS LA VALIDACIÓN ANTES DE LLAMAR AL BACKEND
+      validarFormulario();
+
+      // 3. CONEXIÓN AL BACKEND
       const response = await fetch('http://localhost:3000/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -42,8 +69,7 @@ function Register() {
           nombre: datosFormulario.nombre,
           email: datosFormulario.email,
           password: datosFormulario.contraseña,
-          fechaNacimiento: datosFormulario.fechaNacimiento,
-          rol: datosFormulario.rol
+          fechaNacimiento: datosFormulario.fechaNacimiento
         })
       });
 
@@ -53,8 +79,11 @@ function Register() {
         throw new Error(data.error || "Error al registrarse");
       }
 
+      // Éxito
       navigate('/login', { 
-        state: { mensaje: "¡Cuenta creada! Inicia sesión." } 
+        state: { 
+          mensaje: "¡Cuenta creada exitosamente! Elige cómo entrar." 
+        } 
       });
 
     } catch (err) {
@@ -69,7 +98,8 @@ function Register() {
       <div className="tarjeta-auth">
         <div className="encabezado-auth">
           <div className="logo">Kick<span>2</span></div>
-          <h1>Crear Cuenta</h1>
+          <h1>Unirse a la Comunidad</h1>
+          <p>Crea tu cuenta y comienza tu aventura streaming</p>
         </div>
 
         <form onSubmit={manejarRegistro} className="formulario-auth">
@@ -83,6 +113,7 @@ function Register() {
               value={datosFormulario.nombre}
               onChange={manejarCambio}
               required
+              disabled={cargando}
             />
           </div>
 
@@ -94,24 +125,9 @@ function Register() {
               value={datosFormulario.email}
               onChange={manejarCambio}
               required
+              disabled={cargando}
             />
           </div>
-
-          {/* --- NUEVO: SELECTOR DE ROL --- */}
-          <div className="grupo-input">
-            <label style={{marginBottom: '5px', display:'block', color:'#ccc'}}>¿Qué quieres ser?</label>
-            <select 
-                name="rol" 
-                value={datosFormulario.rol} 
-                onChange={manejarCambio}
-                className="input-select"
-                style={{width: '100%', padding: '10px', borderRadius: '5px', background:'#2a2a2a', color:'white', border:'1px solid #444'}}
-            >
-                <option value="espectador">👀 Espectador (Ver y apoyar)</option>
-                <option value="streamer">🎥 Streamer (Transmitir)</option>
-            </select>
-          </div>
-          {/* ------------------------------ */}
 
           <div className="grupo-input">
             <input
@@ -121,7 +137,9 @@ function Register() {
               value={datosFormulario.contraseña}
               onChange={manejarCambio}
               required
+              disabled={cargando}
             />
+            <div className="pista-contraseña">Mínimo 6 caracteres</div>
           </div>
 
           <div className="grupo-input">
@@ -132,30 +150,45 @@ function Register() {
               value={datosFormulario.confirmarContraseña}
               onChange={manejarCambio}
               required
+              disabled={cargando}
             />
           </div>
 
           <div className="grupo-input">
+            <label htmlFor="fechaNacimiento" className="etiqueta-input">
+              Fecha de nacimiento
+            </label>
             <input
               type="date"
+              id="fechaNacimiento"
               name="fechaNacimiento"
               value={datosFormulario.fechaNacimiento}
               onChange={manejarCambio}
               required
+              disabled={cargando}
             />
+          </div>
+
+          <div className="acuerdo-terminos">
+            <p>
+              Al registrarte, aceptas nuestros{' '}
+              <a href="/terminos" className="enlace-terminos">Términos de Servicio.</a>{' '}
+            </p>
           </div>
 
           <button 
             type="submit" 
-            className="boton-enviar"
+            className={`boton-enviar ${cargando ? "cargando" : ""}`}
             disabled={cargando}
           >
-            {cargando ? "Creando..." : "Registrarse"}
+            {cargando ? "Creando cuenta..." : "Crear mi cuenta"}
           </button>
         </form>
 
         <div className="pie-auth">
-          <p>¿Ya tienes cuenta? <Link to="/login" className="enlace-auth">Iniciar sesión</Link></p>
+          <p>
+            ¿Ya tienes cuenta? <Link to="/login" className="enlace-auth">Iniciar sesión</Link>
+          </p>
         </div>
       </div>
     </div>

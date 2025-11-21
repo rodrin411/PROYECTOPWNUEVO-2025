@@ -8,6 +8,9 @@ function Login({ setUsuarioGlobal }) {
     contraseña: ""
   });
   
+  // 1. ESTADO DEL ROL 
+  const [rol, setRol] = useState("espectador"); 
+  
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
   const navigate = useNavigate();
@@ -19,19 +22,21 @@ function Login({ setUsuarioGlobal }) {
     });
   };
 
+  // 2. FUNCIÓN DE LOGIN
   const manejarInicioSesion = async (e) => {
     e.preventDefault();
     setCargando(true);
     setError("");
 
     try {
-      // 1. Petición al Backend
+      // Conexión Backend
       const response = await fetch('http://localhost:3000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: credenciales.usuario, 
-          password: credenciales.contraseña
+          email: credenciales.usuario,
+          password: credenciales.contraseña,
+          rolElegido: rol
         })
       });
 
@@ -41,11 +46,11 @@ function Login({ setUsuarioGlobal }) {
         throw new Error(data.error || "Credenciales incorrectas.");
       }
 
-      // 2. Guardar sesión
+      // Guardar sesión
       localStorage.setItem('usuario_sesion', JSON.stringify(data.usuario));
       setUsuarioGlobal(data.usuario);
 
-      // 3. REDIRECCIÓN AUTOMÁTICA SEGÚN EL ROL DE LA BD
+      // Redirección basada en lo que respondió el backend
       if (data.usuario.rol === 'streamer') {
         navigate("/dashboard-streamer");
       } else {
@@ -95,15 +100,34 @@ function Login({ setUsuarioGlobal }) {
             />
           </div>
 
-          {/* a */}
-          {/* a */}
+          <div className="selector-rol">
+            <label>¿Cómo quieres entrar?</label>
+            <div className="botones-rol">
+              <button 
+                type="button"
+                className={`boton-rol ${rol === "espectador" ? "activo" : ""}`}
+                onClick={() => setRol("espectador")}
+                disabled={cargando}
+              >
+                👀 Espectador
+              </button>
+              <button 
+                type="button"
+                className={`boton-rol ${rol === "streamer" ? "activo" : ""}`}
+                onClick={() => setRol("streamer")}
+                disabled={cargando}
+              >
+                🎥 Streamer
+              </button>
+            </div>
+          </div>
 
           <button 
             type="submit" 
             className={`boton-enviar ${cargando ? "cargando" : ""}`}
             disabled={cargando}
           >
-            {cargando ? "Verificando..." : "Entrar a la plataforma"}
+            {cargando ? "Iniciando sesión..." : "Entrar a la plataforma"}
           </button>
         </form>
 
