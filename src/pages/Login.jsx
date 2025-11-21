@@ -7,7 +7,8 @@ function Login({ setUsuarioGlobal }) {
     usuario: "",
     contraseña: ""
   });
-  const [rol, setRol] = useState("espectador");
+  
+  // Ya no necesitamos el estado "rol" aquí, porque viene de la BD
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
   const navigate = useNavigate();
@@ -19,20 +20,18 @@ function Login({ setUsuarioGlobal }) {
     });
   };
 
-  // ... (resto igual)
-
   const manejarInicioSesion = async (e) => {
     e.preventDefault();
     setCargando(true);
     setError("");
 
     try {
-      // --- CAMBIO AQUÍ: CONEXIÓN AL BACKEND ---
+      // 1. Petición al Backend
       const response = await fetch('http://localhost:3000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: credenciales.usuario, // Tu backend acepta email o nombre en este campo
+          email: credenciales.usuario, 
           password: credenciales.contraseña
         })
       });
@@ -40,19 +39,20 @@ function Login({ setUsuarioGlobal }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Credenciales incorrectas");
+        throw new Error(data.error || "Credenciales incorrectas.");
       }
 
-      // Guardar sesión y actualizar estado global
-      // OJO: Aquí podrías guardar el token si lo implementamos, por ahora guardamos el usuario
+      // 2. Guardar sesión
       localStorage.setItem('usuario_sesion', JSON.stringify(data.usuario));
-      
       setUsuarioGlobal(data.usuario);
-      
-      // Redirigir según rol
-      navigate(data.usuario.rol === "streamer" ? "/dashboard-streamer" : "/perfil-espectador");
-      // -----------------------------------------
 
+      // 3. REDIRECCIÓN AUTOMÁTICA SEGÚN EL ROL DE LA BD
+      if (data.usuario.rol === 'streamer') {
+        navigate("/dashboard-streamer");
+      } else {
+        navigate("/perfil-espectador");
+      }
+      
     } catch (err) {
       setError(err.message);
     } finally {
@@ -96,34 +96,15 @@ function Login({ setUsuarioGlobal }) {
             />
           </div>
 
-          <div className="selector-rol">
-            <label>¿Cómo quieres entrar?</label>
-            <div className="botones-rol">
-              <button 
-                type="button"
-                className={`boton-rol ${rol === "espectador" ? "activo" : ""}`}
-                onClick={() => setRol("espectador")}
-                disabled={cargando}
-              >
-                👀 Espectador
-              </button>
-              <button 
-                type="button"
-                className={`boton-rol ${rol === "streamer" ? "activo" : ""}`}
-                onClick={() => setRol("streamer")}
-                disabled={cargando}
-              >
-                🎥 Streamer
-              </button>
-            </div>
-          </div>
+          {/* --- SECCIÓN DE BOTONES DE ROL ELIMINADA --- */}
+          {/* El sistema ahora detecta el rol automáticamente */}
 
           <button 
             type="submit" 
             className={`boton-enviar ${cargando ? "cargando" : ""}`}
             disabled={cargando}
           >
-            {cargando ? "Iniciando sesión..." : "Entrar a la plataforma"}
+            {cargando ? "Verificando..." : "Entrar a la plataforma"}
           </button>
         </form>
 
@@ -138,4 +119,3 @@ function Login({ setUsuarioGlobal }) {
 }
 
 export default Login;
-

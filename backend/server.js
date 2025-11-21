@@ -2,41 +2,109 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
-const bcrypt = require('bcrypt'); // Asegúrate de tener esto instalado
-const db = require('./models'); // Importa Sequelize
+const bcrypt = require('bcrypt');
+const db = require('./models');
 require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
 
 // Middleware
-app.use(cors()); // Permite conexión desde el Frontend
-app.use(express.json()); // Permite leer JSON del Frontend
+app.use(cors());
+app.use(express.json());
 
-// --- SOCKET.IO (Lo usaremos luego) ---
+// --- LÓGICA DE MATEMÁTICA (NIVELES) ---
+const calcularTechoNivel = (n) => (10 * n * (n + 1)) / 2;
+
+const calcularNuevoNivel = (puntosActuales, nivelActual) => {
+  let nuevoNivel = nivelActual;
+  while (puntosActuales >= calcularTechoNivel(nuevoNivel)) {
+    nuevoNivel++;
+  }
+  return nuevoNivel;
+};
+
+// --- SOCKET.IO (CHAT Y REGALOS) ---
 const io = new Server(server, {
   cors: { origin: "http://localhost:5173" }
 });
 
-// --- RUTAS (AQUÍ ES DONDE TE FALTABA CÓDIGO) ---
+io.on('connection', (socket) => {
+  console.log('🔌 Cliente conectado al socket:', socket.id);
 
-// 1. RUTA DE REGISTRO
+  socket.on('unirse_stream', (streamId) => {
+    socket.join(streamId);
+  });
+
+  // CHAT
+  socket.on('enviar_mensaje', async (data) => {
+    try {
+      const usuario = await db.Usuario.findByPk(data.usuarioId);
+      if (usuario) {
+        const nuevosPuntos = usuario.puntos + 1;
+        const nuevoNivel = calcularNuevoNivel(nuevosPuntos, usuario.nivel);
+        
+        await usuario.update({ puntos: nuevosPuntos, nivel: nuevoNivel });
+
+        io.to(data.streamId).emit('recibir_mensaje', {
+          id: Date.now(),
+          autor: usuario.nombre,
+          texto: data.texto,
+          nivel: nuevoNivel,
+          esRegalo: false
+        });
+      }
+    } catch (error) {
+      console.error("Error socket chat:", error);
+    }
+  });
+
+  // REGALOS
+  socket.on('enviar_regalo', async (data) => {
+    try {
+      const usuario = await db.Usuario.findByPk(data.usuarioId);
+      if (usuario && usuario.saldo >= data.regalo.costo) {
+        const nuevoSaldo = parseFloat(usuario.saldo) - data.regalo.costo;
+        const nuevosPuntos = usuario.puntos + data.regalo.xp;
+        const nuevoNivel = calcularNuevoNivel(nuevosPuntos, usuario.nivel);
+
+        await usuario.update({ saldo: nuevoSaldo, puntos: nuevosPuntos, nivel: nuevoNivel });
+
+        // Notificar al chat
+        io.to(data.streamId).emit('recibir_mensaje', {
+          id: Date.now(),
+          autor: usuario.nombre,
+          texto: `ha enviado ${data.regalo.nombre} ${data.regalo.emoji}`,
+          nivel: nuevoNivel,
+          esRegalo: true,
+          colorAutor: '#a855f7'
+        });
+
+        // Actualizar cliente específico
+        socket.emit('actualizar_saldo', { nuevoSaldo, nuevoNivel, nuevosPuntos });
+      }
+    } catch (error) {
+      console.error("Error socket regalo:", error);
+    }
+  });
+});
+
+// --- RUTAS API (ENDPOINTS) ---
+
+// 1. REGISTRO
 app.post('/api/register', async (req, res) => {
-  console.log("Intentando registrar usuario:", req.body.email); // Log para depurar
+  console.log("📥 Petición de Registro recibida:", req.body.email);
   try {
     const { nombre, email, password, rol, fechaNacimiento } = req.body;
 
-    // Validar si ya existe
     const existeEmail = await db.Usuario.findOne({ where: { email } });
     if (existeEmail) return res.status(400).json({ error: "El email ya existe" });
 
     const existeNombre = await db.Usuario.findOne({ where: { nombre } });
     if (existeNombre) return res.status(400).json({ error: "El nombre ya está en uso" });
 
-    // Encriptar contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear en BD
     const nuevoUsuario = await db.Usuario.create({
       nombre,
       email,
@@ -48,28 +116,41 @@ app.post('/api/register', async (req, res) => {
       avatarUrl: "https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
     });
 
-    res.json({ mensaje: "Usuario creado", usuario: nuevoUsuario });
+    console.log("✅ Usuario creado:", nuevoUsuario.id);
+    
+    // CAMBIO AQUÍ: Construimos la respuesta manual
+    res.json({ 
+        mensaje: "Usuario creado", 
+        usuario: {
+            id: nuevoUsuario.id,
+            nombre: nuevoUsuario.nombre,
+            email: nuevoUsuario.email,
+            rol: nuevoUsuario.rol,
+            monedas: nuevoUsuario.saldo, // <--- AQUÍ ESTÁ LA MAGIA
+            nivel: nuevoUsuario.nivel,
+            puntos: nuevoUsuario.puntos,
+            avatarUrl: nuevoUsuario.avatarUrl
+        }
+    });
 
   } catch (error) {
-    console.error("Error en registro:", error);
-    res.status(500).json({ error: "Error en el servidor: " + error.message });
+    console.error("❌ Error en registro:", error);
+    res.status(500).json({ error: "Error en el servidor" });
   }
 });
 
-// 2. RUTA DE LOGIN
+// 2. LOGIN
 app.post('/api/login', async (req, res) => {
-  console.log("Intentando login:", req.body.email);
+  console.log("📥 Petición de Login recibida:", req.body.email);
   try {
     const { email, password } = req.body;
 
-    // Buscar por email o nombre
     const usuario = await db.Usuario.findOne({ 
       where: db.Sequelize.or({ email: email }, { nombre: email }) 
     });
 
     if (!usuario) return res.status(404).json({ error: "Usuario no encontrado" });
 
-    // Comparar contraseñas
     const validPassword = await bcrypt.compare(password, usuario.password);
     if (!validPassword) return res.status(401).json({ error: "Contraseña incorrecta" });
 
@@ -80,7 +161,10 @@ app.post('/api/login', async (req, res) => {
         nombre: usuario.nombre,
         email: usuario.email,
         rol: usuario.rol,
-        saldo: usuario.saldo,
+        
+        // CAMBIO AQUÍ: Enviamos 'saldo' pero le ponemos la etiqueta 'monedas'
+        monedas: usuario.saldo, 
+        
         nivel: usuario.nivel,
         puntos: usuario.puntos,
         avatarUrl: usuario.avatarUrl
@@ -88,17 +172,41 @@ app.post('/api/login', async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error login:", error);
     res.status(500).json({ error: "Error al iniciar sesión" });
   }
 });
 
-// Iniciar servidor
+// 3. COMPRAR MONEDAS
+app.post('/api/comprar-monedas', async (req, res) => {
+  console.log("📥 Petición de Compra recibida");
+  try {
+    const { usuarioId, monto } = req.body;
+    
+    const usuario = await db.Usuario.findByPk(usuarioId);
+    if (!usuario) return res.status(404).json({ error: "Usuario no encontrado" });
+
+    const nuevoSaldo = parseFloat(usuario.saldo) + parseFloat(monto);
+    await usuario.update({ saldo: nuevoSaldo });
+
+    await db.Transaccion.create({
+      usuarioOrigenId: usuarioId,
+      tipo: 'recarga',
+      monto: monto
+    });
+
+    console.log("✅ Compra exitosa. Nuevo saldo:", nuevoSaldo);
+    res.json({ mensaje: "Compra exitosa", nuevoSaldo });
+  } catch (error) {
+    console.error("❌ Error compra:", error);
+    res.status(500).json({ error: "Error en la compra" });
+  }
+});
+
+// INICIAR
 db.sequelize.sync().then(() => {
-  const PUERTO = process.env.PORT || 3000;
-  server.listen(PUERTO, () => {
-    console.log(`🚀 Servidor Backend corriendo en puerto ${PUERTO}`);
-    console.log(`   - Ruta de registro activa: POST http://localhost:${PUERTO}/api/register`);
-    console.log(`   - Ruta de login activa:    POST http://localhost:${PUERTO}/api/login`);
+  const PORT = process.env.PORT || 3000;
+  server.listen(PORT, () => {
+    console.log(`🚀 Servidor Backend corriendo en puerto ${PORT}`);
   });
 });
