@@ -1,8 +1,6 @@
 const dotenv = require('dotenv');
 const path = require('path');
 
-// CORRECCIÓN AQUÍ: Cambiamos '../datos.env' por '../.env'
-// Esto le dice: "Sal de la carpeta config (..) y busca el archivo .env"
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 module.exports = {

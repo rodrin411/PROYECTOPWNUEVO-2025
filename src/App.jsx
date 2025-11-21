@@ -72,7 +72,6 @@ function App() {
     return savedData ? JSON.parse(savedData) : null;
   });
 
-  // Sincronizar localStorage cuando el usuario cambia
   useEffect(() => {
     if (usuario) {
       localStorage.setItem('userData', JSON.stringify(usuario));

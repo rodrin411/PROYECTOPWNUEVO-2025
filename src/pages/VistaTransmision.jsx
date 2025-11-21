@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useOutletContext, useLocation, useNavigate } from 'react-router-dom';
-import { io } from 'socket.io-client'; // <--- IMPORTANTE: Socket.io
+import { io } from 'socket.io-client';
 import './VistaTransmision.css';
 
 function VistaTransmision() {
@@ -13,12 +13,12 @@ function VistaTransmision() {
   const datosTransmision = ubicacion.state || {
     titulo: "Transmisión Desconocida",
     streamer: "Usuario",
-    id: "global" // ID por defecto si no viene en el state
+    id: "global"
   };
 
   const streamId = datosTransmision.id || "sala_general";
 
-  // Estado de mensajes (iniciamos vacío o con mensaje de sistema)
+  // Estado de mensajes
   const [mensajes, setMensajes] = useState([
     { id: 1, autor: 'Sistema', nivel: 99, texto: `Bienvenido al chat de ${datosTransmision.streamer}`, esMod: true }
   ]);
@@ -29,7 +29,7 @@ function VistaTransmision() {
   const [regaloSeleccionado, setRegaloSeleccionado] = useState(null);
   const [errorSaldo, setErrorSaldo] = useState(false);
 
-  // Catálogo de Regalos (Igual que antes)
+  // Catálogo de Regalos
   const catalogoRegalos = [
     { id: 1, nombre: 'Like', costo: 10, xp: 5, emoji: '👍' },
     { id: 2, nombre: 'Corazón', costo: 20, xp: 10, emoji: '❤️' },
@@ -59,7 +59,7 @@ function VistaTransmision() {
       ]);
     });
 
-    // B) Escuchar actualización de saldo/nivel (Viene del backend tras enviar regalo)
+    // B) Escuchar actualización de saldo/nivel
     nuevoSocket.on('actualizar_saldo', (data) => {
        if (usuario) {
          const usuarioActualizado = { 
@@ -84,7 +84,6 @@ function VistaTransmision() {
     return () => nuevoSocket.disconnect();
   }, [streamId, usuario?.nombre]); // Se reconecta si cambia el usuario o el stream
 
-  // Scroll automático
   useEffect(() => {
     if(referenciaChat.current) {
       referenciaChat.current.scrollTop = referenciaChat.current.scrollHeight;
@@ -92,7 +91,7 @@ function VistaTransmision() {
   }, [mensajes]);
 
 
-  // --- 2. ENVIAR MENSAJE (AHORA VIAJA AL BACKEND) ---
+  // --- 2. ENVIAR MENSAJE ---
   const enviarMensaje = (e) => {
     e.preventDefault();
     if (!nuevoMensaje.trim()) return;
@@ -109,12 +108,12 @@ function VistaTransmision() {
     setNuevoMensaje("");
   };
 
-  // --- 3. ENVIAR REGALO (AHORA VIAJA AL BACKEND) ---
+  // --- 3. ENVIAR REGALO ---
   const enviarRegalo = () => {
     if (!regaloSeleccionado) return;
     if (!usuario) return alert("Inicia sesión para enviar regalos");
 
-    // Validación visual rápida (el backend validará de nuevo por seguridad)
+    // Validación visual rápida
     if (usuario.monedas < regaloSeleccionado.costo) {
       setErrorSaldo(true); 
       return;
@@ -147,7 +146,7 @@ function VistaTransmision() {
         <div className="reproductor-video">
            <div className="indicador-vivo">EN VIVO</div>
            <div className="boton-reproducir">▶</div>
-           {/* Overlay de regalo (opcional, si quisieras mostrar animaciones grandes) */}
+           {/* Overlay de regalo */}
         </div>
 
         <div className="barra-info-transmision">
@@ -205,7 +204,7 @@ function VistaTransmision() {
          </form>
       </aside>
 
-      {/* --- MODAL DE REGALOS (Sin cambios visuales, solo lógica) --- */}
+      {/* --- MODAL DE REGALOS --- */}
       {mostrarModalRegalos && (
           <div className="overlay-regalos">
               <div className="modal-regalos">

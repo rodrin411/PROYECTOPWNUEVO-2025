@@ -9,7 +9,7 @@ function Register() {
     contraseña: "",
     confirmarContraseña: "",
     fechaNacimiento: "",
-    rol: "espectador" // Valor por defecto
+    rol: "espectador"
   });
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
@@ -43,7 +43,7 @@ function Register() {
           email: datosFormulario.email,
           password: datosFormulario.contraseña,
           fechaNacimiento: datosFormulario.fechaNacimiento,
-          rol: datosFormulario.rol // <--- AHORA SÍ ENVIAMOS EL ROL ELEGIDO
+          rol: datosFormulario.rol
         })
       });
 

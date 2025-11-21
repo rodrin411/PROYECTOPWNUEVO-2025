@@ -22,8 +22,6 @@ function ComprarMonedas() {
     setDatosTarjeta({ ...datosTarjeta, [e.target.name]: e.target.value });
   };
 
-  // ... imports y estados ...
-
   const procesarPago = async (e) => {
     e.preventDefault();
     setProcesando(true);
@@ -50,8 +48,8 @@ function ComprarMonedas() {
       // Guardar en localStorage para persistencia
       localStorage.setItem('usuario_sesion', JSON.stringify(usuarioActualizado));
 
-      // Generar recibo (Tu código actual del PDF)
-      const idTx = "TXN" + Date.now(); // O usa el ID que devuelve el backend si quieres
+      // Generar recibo
+      const idTx = "TXN" + Date.now();
       const fecha = new Date().toLocaleString();
 
       setTransaccion({
@@ -69,8 +67,6 @@ function ComprarMonedas() {
       setProcesando(false);
     }
   };
-
-  // ... resto del componente (render) ...
 
   const cerrarModal = () => {
     setPaqueteSeleccionado(null);
@@ -110,7 +106,7 @@ function ComprarMonedas() {
       <h2>Tienda de Monedas</h2>
       <p>Elige un paquete para recargar tu saldo.</p>
 
-      {/* --- AQUÍ ESTÁ EL DISEÑO RESTAURADO (3 TARJETAS) --- */}
+      {/*a*/}
       <div className="paquetes-container">
         
         {/* Tarjeta 1 */}

@@ -8,7 +8,6 @@ function Login({ setUsuarioGlobal }) {
     contraseña: ""
   });
   
-  // Ya no necesitamos el estado "rol" aquí, porque viene de la BD
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
   const navigate = useNavigate();
@@ -96,8 +95,8 @@ function Login({ setUsuarioGlobal }) {
             />
           </div>
 
-          {/* --- SECCIÓN DE BOTONES DE ROL ELIMINADA --- */}
-          {/* El sistema ahora detecta el rol automáticamente */}
+          {/* a */}
+          {/* a */}
 
           <button 
             type="submit" 
