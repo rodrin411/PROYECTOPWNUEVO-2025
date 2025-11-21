@@ -21,7 +21,9 @@ function Register() {
     });
   };
 
+  // 1. VALIDACIÓN
   const validarFormulario = () => {
+    // Validar contraseña
     if (datosFormulario.contraseña.length < 6) {
       throw new Error("La contraseña debe tener al menos 6 caracteres");
     }
@@ -34,11 +36,17 @@ function Register() {
       throw new Error("Por favor ingresa un email válido");
     }
 
-    // Calcular edad mínima (13 años)
+    // Calcular edad
     const fechaNacimiento = new Date(datosFormulario.fechaNacimiento);
     const hoy = new Date();
-    const edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+    let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+    const mes = hoy.getMonth() - fechaNacimiento.getMonth();
     
+    if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
+        edad--;
+    }
+    
+    // Validar 13 años
     if (edad < 13) {
       throw new Error("Debes tener al menos 13 años para registrarte");
     }
@@ -50,59 +58,31 @@ function Register() {
     setError("");
 
     try {
+      // 2. EJECUTAMOS LA VALIDACIÓN ANTES DE LLAMAR AL BACKEND
       validarFormulario();
 
-      // Simular retraso de red
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // 3. CONEXIÓN AL BACKEND
+      const response = await fetch('http://localhost:3000/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: datosFormulario.nombre,
+          email: datosFormulario.email,
+          password: datosFormulario.contraseña,
+          fechaNacimiento: datosFormulario.fechaNacimiento
+        })
+      });
 
-      const dbUsuarios = JSON.parse(localStorage.getItem("usuarios")) || {};
+      const data = await response.json();
 
-      // Verificar si el usuario o email ya existen
-      if (dbUsuarios[datosFormulario.nombre]) {
-        throw new Error("Este nombre de usuario ya está en uso");
+      if (!response.ok) {
+        throw new Error(data.error || "Error al registrarse");
       }
 
-      const emailExiste = Object.values(dbUsuarios).some(usuario => 
-        usuario.email === datosFormulario.email
-      );
-
-      if (emailExiste) {
-        throw new Error("Este email ya está registrado");
-      }
-
-      // Crear nueva cuenta
-      const nuevaCuenta = {
-        nombre: datosFormulario.nombre,
-        email: datosFormulario.email,
-        contraseña: datosFormulario.contraseña,
-        fechaNacimiento: datosFormulario.fechaNacimiento,
-        avatarUrl: "https://cdn-icons-png.flaticon.com/512/4140/4140048.png",
-        fechaRegistro: new Date().toISOString(),
-        
-        espectadorData: {
-          monedas: 500,
-          nivel: 1,
-          puntos: 0,
-        },
-
-        streamerData: {
-          nivelStreamer: 1,
-          estadisticasStreamer: {
-            horasTotales: 0,
-            sesiones: 0,
-            picoEspectadores: 0,
-            subsActuales: 0,
-          },
-          regalos: []
-        },
-      };
-
-      dbUsuarios[datosFormulario.nombre] = nuevaCuenta;
-      localStorage.setItem("usuarios", JSON.stringify(dbUsuarios));
-      
+      // Éxito
       navigate('/login', { 
         state: { 
-          mensaje: "¡Cuenta creada exitosamente! Ya puedes iniciar sesión." 
+          mensaje: "¡Cuenta creada exitosamente! Elige cómo entrar." 
         } 
       });
 

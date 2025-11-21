@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useOutletContext, useLocation, useNavigate } from 'react-router-dom';
+import { io } from 'socket.io-client';
 import './VistaTransmision.css';
 
 function VistaTransmision() {
@@ -7,16 +8,21 @@ function VistaTransmision() {
   const ubicacion = useLocation();
   const referenciaChat = useRef(null);
   const navigate = useNavigate();
-  
+  const [socket, setSocket] = useState(null); // Estado para guardar la conexión
+
   const datosTransmision = ubicacion.state || {
-     titulo: "Transmisión Desconocida",
-     streamer: "Usuario",
+    titulo: "Transmisión Desconocida",
+    streamer: "Usuario",
+    id: "global"
   };
 
+  const streamId = datosTransmision.id || "sala_general";
+
+  // Estado de mensajes
   const [mensajes, setMensajes] = useState([
-    { id: 1, autor: 'Sistema', nivel: 99, texto: `Bienvenido al chat de ${datosTransmision.streamer}`, esMod: true },
-    { id: 2, autor: 'Fanatico123', nivel: 5, texto: '¡Hola a todos!', esMod: false },
+    { id: 1, autor: 'Sistema', nivel: 99, texto: `Bienvenido al chat de ${datosTransmision.streamer}`, esMod: true }
   ]);
+  
   const [nuevoMensaje, setNuevoMensaje] = useState("");
   const [notificacionNivel, setNotificacionNivel] = useState(null);
   const [mostrarModalRegalos, setMostrarModalRegalos] = useState(false);
@@ -25,138 +31,132 @@ function VistaTransmision() {
 
   // Catálogo de Regalos
   const catalogoRegalos = [
-      { id: 1, nombre: 'Like', costo: 10, xp: 5, emoji: '👍' },
-      { id: 2, nombre: 'Corazón', costo: 20, xp: 10, emoji: '❤️' },
-      { id: 3, nombre: 'Aplausos', costo: 30, xp: 15, emoji: '👏' },
-      { id: 4, nombre: 'Estrella', costo: 50, xp: 25, emoji: '⭐' },
-      { id: 5, nombre: 'Fuego', costo: 100, xp: 60, emoji: '🔥' },
-      { id: 6, nombre: 'Corona', costo: 500, xp: 300, emoji: '👑' },
+    { id: 1, nombre: 'Like', costo: 10, xp: 5, emoji: '👍' },
+    { id: 2, nombre: 'Corazón', costo: 20, xp: 10, emoji: '❤️' },
+    { id: 3, nombre: 'Aplausos', costo: 30, xp: 15, emoji: '👏' },
+    { id: 4, nombre: 'Estrella', costo: 50, xp: 25, emoji: '⭐' },
+    { id: 5, nombre: 'Fuego', costo: 100, xp: 60, emoji: '🔥' },
+    { id: 6, nombre: 'Corona', costo: 500, xp: 300, emoji: '👑' },
   ];
 
+  // --- 1. CONEXIÓN CON EL BACKEND ---
   useEffect(() => {
-      if(referenciaChat.current) {
-          referenciaChat.current.scrollTop = referenciaChat.current.scrollHeight;
-      }
-  }, [mensajes]);
+    // Conectar al servidor (puerto 3000)
+    const nuevoSocket = io('http://localhost:3000');
+    setSocket(nuevoSocket);
 
-  // --- SIMULACIÓN DE CHAT  ---
+    // Unirse a la sala específica de este stream
+    nuevoSocket.emit('unirse_stream', streamId);
+
+    // A) Escuchar mensajes REALES que llegan del servidor
+    nuevoSocket.on('recibir_mensaje', (msj) => {
+      setMensajes((prev) => [
+        ...prev.slice(-49), // Mantener solo los últimos 50
+        { 
+          ...msj, 
+          esYo: msj.autor === usuario?.nombre // Identificar si fui yo
+        }
+      ]);
+    });
+
+    // B) Escuchar actualización de saldo/nivel
+    nuevoSocket.on('actualizar_saldo', (data) => {
+       if (usuario) {
+         const usuarioActualizado = { 
+            ...usuario, 
+            monedas: data.nuevoSaldo, 
+            nivel: data.nuevoNivel, 
+            puntos: data.nuevosPuntos 
+         };
+         
+         if (data.nuevoNivel > usuario.nivel) {
+            setNotificacionNivel(data.nuevoNivel);
+            setTimeout(() => setNotificacionNivel(null), 4000);
+         }
+
+         setUsuario(usuarioActualizado);
+         localStorage.setItem('usuario_sesion', JSON.stringify(usuarioActualizado));
+       }
+    });
+
+    return () => nuevoSocket.disconnect();
+  }, [streamId, usuario?.nombre]); 
+
+  // --- 2. SIMULACIÓN DE CHAT  ---
   useEffect(() => {
     const loop = setInterval(() => {
       if (Math.random() < 0.3) {
-        const users = ["Viewer1", "GamerPro", "Fan_Kick", "Troll99", "Anonimo"];
-        const texts = ["Hola!", "GG", "Que pro", "Juega otra cosa", "Saludame!", "lol", "POG", "F"];
+        const users = ["Viewer1", "GamerPro", "Fan_Kick", "Troll99", "Anonimo", "Bot_Support"];
+        const texts = ["Hola!", "GG", "Que pro", "Juega otra cosa", "Saludame!", "lol", "POG", "F", "Increíble stream"];
         
         const nuevoBot = {
-            id: Date.now(),
+            id: Date.now() + Math.random(),
             autor: users[Math.floor(Math.random() * users.length)],
             nivel: Math.floor(Math.random() * 40) + 1, 
             texto: texts[Math.floor(Math.random() * texts.length)],
             esYo: false,
-            esMod: Math.random() > 0.9 // 10% chance de ser mod
+            esMod: Math.random() > 0.95
         };
 
-        setMensajes(prev => [...prev.slice(-49), nuevoBot]); // Mantenemos ultimos 50
+        setMensajes(prev => [...prev.slice(-49), nuevoBot]);
       }
     }, 2500);
 
     return () => clearInterval(loop);
   }, []);
 
-  const calcularTechoNivel = (n) => (10 * n * (n + 1)) / 2;
+  // Scroll automático
+  useEffect(() => {
+    if(referenciaChat.current) {
+      referenciaChat.current.scrollTop = referenciaChat.current.scrollHeight;
+    }
+  }, [mensajes]);
 
-  // --- FUNCIÓN ENVIAR REGALO ---
-  const enviarRegalo = () => {
-      if (!regaloSeleccionado) return;
-      if (!usuario) return alert("Inicia sesión para enviar regalos");
 
-      if (usuario.monedas < regaloSeleccionado.costo) {
-          setErrorSaldo(true); 
-          return;
-      }
-
-      const nivelActual = usuario.nivel || 1;
-      const puntosActuales = usuario.puntos || 0;
-      const monedasRestantes = usuario.monedas - regaloSeleccionado.costo;
-      const nuevosPuntos = puntosActuales + regaloSeleccionado.xp;
-      
-      let nuevoNivelCalculado = nivelActual;
-      while (nuevosPuntos >= calcularTechoNivel(nuevoNivelCalculado)) {
-          nuevoNivelCalculado++;
-      }
-
-      let huboSubidaDeNivel = nuevoNivelCalculado > nivelActual;
-
-      const mensajeRegalo = {
-          id: Date.now(),
-          autor: usuario.nombre,
-          nivel: nuevoNivelCalculado, 
-          texto: `ha enviado un regalo: ${regaloSeleccionado.nombre} ${regaloSeleccionado.emoji}`,
-          esYo: true,
-          esRegalo: true 
-      };
-
-      setMensajes([...mensajes, mensajeRegalo]);
-
-      setUsuario({ 
-          ...usuario, 
-          monedas: monedasRestantes,
-          puntos: nuevosPuntos,
-          nivel: nuevoNivelCalculado
-      });
-
-      if (huboSubidaDeNivel) {
-          setNotificacionNivel(nuevoNivelCalculado);
-          setTimeout(() => setNotificacionNivel(null), 4000);
-      }
-      
-      setMostrarModalRegalos(false);
-      setRegaloSeleccionado(null);
-  };
-
-  const cerrarModal = () => {
-      setMostrarModalRegalos(false);
-      setRegaloSeleccionado(null);
-      setErrorSaldo(false);
-  };
-
-  const irATienda = () => {
-      navigate('/comprar-monedas');
-  };
-
-  // --- FUNCIÓN ENVIAR MENSAJE ---
+  // --- 3. FUNCIONES DE ENVÍO (AL BACKEND) ---
   const enviarMensaje = (e) => {
     e.preventDefault();
     if (!nuevoMensaje.trim()) return;
     if (!usuario) return alert("Inicia sesión para chatear");
 
-    const nivelActual = usuario.nivel || 1;
-    const puntosActuales = usuario.puntos || 0;
-    const nuevosPuntos = puntosActuales + 1;
-    
-    let nuevoNivelCalculado = nivelActual;
-    while (nuevosPuntos >= calcularTechoNivel(nuevoNivelCalculado)) {
-        nuevoNivelCalculado++;
-    }
-
-    let huboSubidaDeNivel = nuevoNivelCalculado > nivelActual;
-
-    setMensajes([...mensajes, {
-        id: Date.now(),
-        autor: usuario.nombre,
-        nivel: nuevoNivelCalculado, 
-        texto: nuevoMensaje,
-        esYo: true
-    }]);
-    setNuevoMensaje("");
-
-    setUsuario({ 
-        ...usuario, puntos: nuevosPuntos, nivel: nuevoNivelCalculado 
+    // Emitir evento al servidor real
+    socket.emit('enviar_mensaje', {
+      usuarioId: usuario.id,
+      nombre: usuario.nombre,
+      texto: nuevoMensaje,
+      streamId: streamId
     });
 
-    if (huboSubidaDeNivel) {
-        setNotificacionNivel(nuevoNivelCalculado);
-        setTimeout(() => setNotificacionNivel(null), 4000);
+    setNuevoMensaje("");
+  };
+
+  const enviarRegalo = () => {
+    if (!regaloSeleccionado) return;
+    if (!usuario) return alert("Inicia sesión para enviar regalos");
+
+    if (usuario.monedas < regaloSeleccionado.costo) {
+      setErrorSaldo(true); 
+      return;
     }
+
+    socket.emit('enviar_regalo', {
+      usuarioId: usuario.id,
+      streamId: streamId,
+      regalo: regaloSeleccionado
+    });
+    
+    setMostrarModalRegalos(false);
+    setRegaloSeleccionado(null);
+  };
+
+  const cerrarModal = () => {
+    setMostrarModalRegalos(false);
+    setRegaloSeleccionado(null);
+    setErrorSaldo(false);
+  };
+
+  const irATienda = () => {
+    navigate('/comprar-monedas');
   };
 
   return (
@@ -186,13 +186,14 @@ function VistaTransmision() {
 
       <aside className="barra-lateral-chat">
          <div className="encabezado-chat">Chat de la transmisión</div>
+         
          {notificacionNivel && <div className="alerta-nivel-flotante">🎉 ¡Nivel {notificacionNivel} alcanzado!</div>}
 
          <div className="caja-mensajes" ref={referenciaChat}>
             {mensajes.map(msg => (
                 <div key={msg.id} className={`fila-mensaje ${msg.esYo ? 'propio' : ''} ${msg.esRegalo ? 'mensaje-regalo' : ''}`}>
-                    <span className="insignia-nivel">{msg.nivel}</span>
-                    <span className="autor-mensaje" style={{color: msg.esMod ? '#00ffcc' : (msg.esYo ? '#00ffcc' : '#bbb')}}>
+                    <span className="insignia-nivel">{msg.nivel || 1}</span>
+                    <span className="autor-mensaje" style={{color: msg.esMod ? '#00ffcc' : (msg.esYo ? '#00ffcc' : (msg.colorAutor || '#bbb'))}}>
                         {msg.autor}:
                     </span>
                     <span className="texto-mensaje">{msg.texto}</span>
@@ -201,21 +202,25 @@ function VistaTransmision() {
          </div>
          
          <form className="area-input-chat" onSubmit={enviarMensaje}>
-            <input value={nuevoMensaje} onChange={e => setNuevoMensaje(e.target.value)} placeholder="Enviar mensaje..." />
+            <input 
+              value={nuevoMensaje} 
+              onChange={e => setNuevoMensaje(e.target.value)} 
+              placeholder={usuario ? "Enviar mensaje..." : "Inicia sesión para chatear"} 
+              disabled={!usuario}
+            />
             <div className="pie-chat">
-                {usuario?.rol === 'espectador' ? (
+                {usuario?.rol === 'espectador' || usuario?.rol === 'streamer' ? (
                     <>
-                <span className="mis-puntos">🏆 {usuario?.puntos || 0}</span>
-                <button type="button" className="boton-regalo" onClick={() => setMostrarModalRegalos(true)}>🎁</button>
+                      <span className="mis-puntos">🏆 {usuario?.puntos || 0}</span>
+                      <button type="button" className="boton-regalo" onClick={() => setMostrarModalRegalos(true)}>🎁</button>
                     </>
                 ) : (
-                    <span className="identidad-streamer" style={{color: '#aaa', fontSize: '0.8rem'}}>Modo Streamer 🎥</span>
+                    <span className="identidad-streamer" style={{color: '#aaa', fontSize: '0.8rem'}}>Invitado</span>
                 )}
             </div>
          </form>
       </aside>
 
-      {/* --- MODAL DE REGALOS  --- */}
       {mostrarModalRegalos && (
           <div className="overlay-regalos">
               <div className="modal-regalos">

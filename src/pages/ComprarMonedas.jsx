@@ -22,16 +22,34 @@ function ComprarMonedas() {
     setDatosTarjeta({ ...datosTarjeta, [e.target.name]: e.target.value });
   };
 
-  const procesarPago = (e) => {
-    e.preventDefault(); // Activa la validación HTML5
-
+  const procesarPago = async (e) => {
+    e.preventDefault();
     setProcesando(true);
 
-    setTimeout(() => {
-      const nuevasMonedas = usuario.monedas + paqueteSeleccionado.cantidad;
-      setUsuario({ ...usuario, monedas: nuevasMonedas });
+    try {
+      // LLAMADA AL BACKEND
+      const response = await fetch('http://localhost:3000/api/comprar-monedas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          usuarioId: usuario.id,
+          monto: paqueteSeleccionado.cantidad,
+          precio: paqueteSeleccionado.precio
+        })
+      });
 
-      const idTx = "TXN" + Math.floor(Math.random() * 10000000000);
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error);
+
+      // ÉXITO: Actualizar estado global
+      const usuarioActualizado = { ...usuario, monedas: data.nuevoSaldo };
+      setUsuario(usuarioActualizado);
+      // Guardar en localStorage para persistencia
+      localStorage.setItem('usuario_sesion', JSON.stringify(usuarioActualizado));
+
+      // Generar recibo
+      const idTx = "TXN" + Date.now();
       const fecha = new Date().toLocaleString();
 
       setTransaccion({
@@ -43,7 +61,11 @@ function ComprarMonedas() {
 
       setProcesando(false);
       crearEfectoMonedas(15);
-    }, 2500);
+
+    } catch (err) {
+      alert("Error en el pago: " + err.message);
+      setProcesando(false);
+    }
   };
 
   const cerrarModal = () => {
@@ -84,7 +106,7 @@ function ComprarMonedas() {
       <h2>Tienda de Monedas</h2>
       <p>Elige un paquete para recargar tu saldo.</p>
 
-      {/* --- AQUÍ ESTÁ EL DISEÑO RESTAURADO (3 TARJETAS) --- */}
+      {/*a*/}
       <div className="paquetes-container">
         
         {/* Tarjeta 1 */}

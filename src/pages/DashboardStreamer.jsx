@@ -12,7 +12,7 @@ function DashboardStreamer() {
 
   const catalogoEmojis = ['🎁', '👋', '🔥', '⭐', '👑', '💎', '🎉', '👻', '🎮', '💩', '🌹', '🍕'];
   
-  // Definimos los defaults aquí para usarlos en la inicialización
+  // Definir defaults
   const regalosDefault = [
     { id: 'def-1', nombre: 'Like', costo: 10, xp: 5, emoji: '👍' },
     { id: 'def-2', nombre: 'Rosas', costo: 50, xp: 20, emoji: '🌹' },
@@ -157,7 +157,7 @@ function DashboardStreamer() {
                           <strong>{r.nombre}</strong>
                           <small>🟡{r.costo} | ⚡{r.xp}</small>
                         </div>
-                        {/* Ahora puedes borrar incluso los defaults porque están en la lista real */}
+                        {/* a */}
                         <button onClick={() => eliminarRegalo(r.id)}>🗑️</button>
                       </li>
                     ))}

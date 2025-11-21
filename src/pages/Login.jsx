@@ -7,7 +7,10 @@ function Login({ setUsuarioGlobal }) {
     usuario: "",
     contraseña: ""
   });
-  const [rol, setRol] = useState("espectador");
+  
+  // 1. ESTADO DEL ROL 
+  const [rol, setRol] = useState("espectador"); 
+  
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
   const navigate = useNavigate();
@@ -19,47 +22,40 @@ function Login({ setUsuarioGlobal }) {
     });
   };
 
+  // 2. FUNCIÓN DE LOGIN
   const manejarInicioSesion = async (e) => {
     e.preventDefault();
     setCargando(true);
     setError("");
 
-    // Simular retraso de red
-    await new Promise(resolve => setTimeout(resolve, 800));
-
     try {
-      const dbUsuarios = JSON.parse(localStorage.getItem("usuarios")) || {};
-      
-      // Buscar usuario por nombre o email
-      const cuentaUsuario = Object.values(dbUsuarios).find(usuario => 
-        (usuario.nombre === credenciales.usuario || usuario.email === credenciales.usuario) &&
-        usuario.contraseña === credenciales.contraseña
-      );
+      // Conexión Backend
+      const response = await fetch('http://localhost:3000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: credenciales.usuario,
+          password: credenciales.contraseña,
+          rolElegido: rol
+        })
+      });
 
-      if (!cuentaUsuario) {
-        throw new Error("Credenciales incorrectas. Verifica tu usuario y contraseña.");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Credenciales incorrectas.");
       }
 
-      let datosSesion;
+      // Guardar sesión
+      localStorage.setItem('usuario_sesion', JSON.stringify(data.usuario));
+      setUsuarioGlobal(data.usuario);
 
-      if (rol === "espectador") {
-        datosSesion = {
-          ...cuentaUsuario.espectadorData,
-          nombre: cuentaUsuario.nombre,
-          avatarUrl: cuentaUsuario.avatarUrl,
-          rol: "espectador",
-        };
-      } else { 
-        datosSesion = {
-          ...cuentaUsuario.streamerData,
-          nombre: cuentaUsuario.nombre,
-          avatarUrl: cuentaUsuario.avatarUrl,
-          rol: "streamer",
-        };
+      // Redirección basada en lo que respondió el backend
+      if (data.usuario.rol === 'streamer') {
+        navigate("/dashboard-streamer");
+      } else {
+        navigate("/perfil-espectador");
       }
-
-      setUsuarioGlobal(datosSesion);
-      navigate(rol === "streamer" ? "/dashboard-streamer" : "/perfil-espectador");
       
     } catch (err) {
       setError(err.message);
@@ -146,4 +142,3 @@ function Login({ setUsuarioGlobal }) {
 }
 
 export default Login;
-

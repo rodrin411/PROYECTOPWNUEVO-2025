@@ -17,7 +17,7 @@ import "./App.css";
 function Home() {
   const navigate = useNavigate();
 
-  // Datos ficticios de streams
+  // Datos ficticios de streams (Esto lo podrías conectar a BD luego, pero por ahora está bien)
   const streams = [
     { id: 1, titulo: "Jugando Fortnite con la comunidad", streamer: "GamerPro", img: "https://picsum.photos/300/200?random=1" },
     { id: 2, titulo: "Música en vivo 🎸", streamer: "RockLive", img: "https://picsum.photos/300/200?random=2" },
@@ -68,16 +68,18 @@ function Home() {
 function App() {
   // ESTADO GLOBAL DEL USUARIO 
   const [usuario, setUsuario] = useState(() => {
-    const savedData = localStorage.getItem('userData');
+    // CAMBIO IMPORTANTE AQUÍ 👇
+    const savedData = localStorage.getItem('usuario_sesion');
     return savedData ? JSON.parse(savedData) : null;
   });
 
-  // Sincronizar localStorage cuando el usuario cambia
   useEffect(() => {
     if (usuario) {
-      localStorage.setItem('userData', JSON.stringify(usuario));
+      // CAMBIO IMPORTANTE AQUÍ 👇
+      localStorage.setItem('usuario_sesion', JSON.stringify(usuario));
     } else {
-      localStorage.removeItem('userData');
+      // CAMBIO IMPORTANTE AQUÍ 👇
+      localStorage.removeItem('usuario_sesion');
     }
   }, [usuario]);
 
