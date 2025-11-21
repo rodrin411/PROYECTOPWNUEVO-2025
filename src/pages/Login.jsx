@@ -19,48 +19,40 @@ function Login({ setUsuarioGlobal }) {
     });
   };
 
+  // ... (resto igual)
+
   const manejarInicioSesion = async (e) => {
     e.preventDefault();
     setCargando(true);
     setError("");
 
-    // Simular retraso de red
-    await new Promise(resolve => setTimeout(resolve, 800));
-
     try {
-      const dbUsuarios = JSON.parse(localStorage.getItem("usuarios")) || {};
-      
-      // Buscar usuario por nombre o email
-      const cuentaUsuario = Object.values(dbUsuarios).find(usuario => 
-        (usuario.nombre === credenciales.usuario || usuario.email === credenciales.usuario) &&
-        usuario.contraseña === credenciales.contraseña
-      );
+      // --- CAMBIO AQUÍ: CONEXIÓN AL BACKEND ---
+      const response = await fetch('http://localhost:3000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: credenciales.usuario, // Tu backend acepta email o nombre en este campo
+          password: credenciales.contraseña
+        })
+      });
 
-      if (!cuentaUsuario) {
-        throw new Error("Credenciales incorrectas. Verifica tu usuario y contraseña.");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Credenciales incorrectas");
       }
 
-      let datosSesion;
-
-      if (rol === "espectador") {
-        datosSesion = {
-          ...cuentaUsuario.espectadorData,
-          nombre: cuentaUsuario.nombre,
-          avatarUrl: cuentaUsuario.avatarUrl,
-          rol: "espectador",
-        };
-      } else { 
-        datosSesion = {
-          ...cuentaUsuario.streamerData,
-          nombre: cuentaUsuario.nombre,
-          avatarUrl: cuentaUsuario.avatarUrl,
-          rol: "streamer",
-        };
-      }
-
-      setUsuarioGlobal(datosSesion);
-      navigate(rol === "streamer" ? "/dashboard-streamer" : "/perfil-espectador");
+      // Guardar sesión y actualizar estado global
+      // OJO: Aquí podrías guardar el token si lo implementamos, por ahora guardamos el usuario
+      localStorage.setItem('usuario_sesion', JSON.stringify(data.usuario));
       
+      setUsuarioGlobal(data.usuario);
+      
+      // Redirigir según rol
+      navigate(data.usuario.rol === "streamer" ? "/dashboard-streamer" : "/perfil-espectador");
+      // -----------------------------------------
+
     } catch (err) {
       setError(err.message);
     } finally {

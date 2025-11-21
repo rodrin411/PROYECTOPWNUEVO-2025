@@ -44,67 +44,40 @@ function Register() {
     }
   };
 
+  // ... (resto de tus imports y estados igual)
+
   const manejarRegistro = async (e) => {
     e.preventDefault();
     setCargando(true);
     setError("");
 
     try {
-      validarFormulario();
+      validarFormulario(); // Tu función de validación actual
 
-      // Simular retraso de red
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      const dbUsuarios = JSON.parse(localStorage.getItem("usuarios")) || {};
-
-      // Verificar si el usuario o email ya existen
-      if (dbUsuarios[datosFormulario.nombre]) {
-        throw new Error("Este nombre de usuario ya está en uso");
-      }
-
-      const emailExiste = Object.values(dbUsuarios).some(usuario => 
-        usuario.email === datosFormulario.email
-      );
-
-      if (emailExiste) {
-        throw new Error("Este email ya está registrado");
-      }
-
-      // Crear nueva cuenta
-      const nuevaCuenta = {
-        nombre: datosFormulario.nombre,
-        email: datosFormulario.email,
-        contraseña: datosFormulario.contraseña,
-        fechaNacimiento: datosFormulario.fechaNacimiento,
-        avatarUrl: "https://cdn-icons-png.flaticon.com/512/4140/4140048.png",
-        fechaRegistro: new Date().toISOString(),
-        
-        espectadorData: {
-          monedas: 500,
-          nivel: 1,
-          puntos: 0,
-        },
-
-        streamerData: {
-          nivelStreamer: 1,
-          estadisticasStreamer: {
-            horasTotales: 0,
-            sesiones: 0,
-            picoEspectadores: 0,
-            subsActuales: 0,
-          },
-          regalos: []
-        },
-      };
-
-      dbUsuarios[datosFormulario.nombre] = nuevaCuenta;
-      localStorage.setItem("usuarios", JSON.stringify(dbUsuarios));
-      
-      navigate('/login', { 
-        state: { 
-          mensaje: "¡Cuenta creada exitosamente! Ya puedes iniciar sesión." 
-        } 
+      // --- CAMBIO AQUÍ: CONEXIÓN AL BACKEND ---
+      const response = await fetch('http://localhost:3000/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: datosFormulario.nombre,
+          email: datosFormulario.email,
+          password: datosFormulario.contraseña, // En el backend lo llamamos 'password'
+          fechaNacimiento: datosFormulario.fechaNacimiento,
+          rol: "espectador" // Por defecto
+        })
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al registrarse");
+      }
+
+      // ÉXITO
+      navigate('/login', { 
+        state: { mensaje: "¡Cuenta creada! Inicia sesión." } 
+      });
+      // -----------------------------------------
 
     } catch (err) {
       setError(err.message);
