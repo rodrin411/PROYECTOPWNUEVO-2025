@@ -26,6 +26,24 @@ function StreamManager() {
   const [mostrarResumen, setMostrarResumen] = useState(false);
   const [datosResumen, setDatosResumen] = useState({ duracion: '', horas: 0, xp: 0 });
 
+ // --- Configuración de puntos por nivel ---
+  const [puntosPorNivel, setPuntosPorNivel] = useState({});
+  const [nuevoNivel, setNuevoNivel] = useState('');
+  const [nuevoXP, setNuevoXP] = useState('');
+
+   const actualizarNivel = (nivel, valor) => {
+    if (!nivel) return;
+    setPuntosPorNivel(prev => ({ ...prev, [nivel]: Number(valor) }));
+  };
+
+  const eliminarNivel = (nivel) => {
+    setPuntosPorNivel(prev => {
+      const copia = { ...prev };
+      delete copia[nivel];
+      return copia;
+    });
+  };
+
   useEffect(() => {
     let intervalo;
     if (enVivo) {
@@ -217,6 +235,55 @@ function StreamManager() {
           </div>
         </div>
       </div>
+
+      {/* CONFIGURAR PUNTOS POR NIVEL */}
+<div className="config-puntos-nivel">
+  <h3>Configurar puntos requeridos por nivel</h3>
+
+  {/* Lista de niveles existentes */}
+  {Object.entries(puntosPorNivel).map(([nivel, puntos]) => (
+    <div key={nivel} style={{ marginBottom: '5px' }}>
+      <input
+        type="number"
+        value={nivel}
+        disabled
+        style={{ width: '50px', marginRight: '5px' }}
+      />
+      <input
+        type="number"
+        value={puntos}
+        min={0}
+        onChange={(e) => actualizarNivel(nivel, e.target.value)}
+        style={{ width: '60px', marginRight: '5px' }}
+      /> puntos
+      <button onClick={() => eliminarNivel(nivel)}>❌</button>
+    </div>
+  ))}
+
+  {/* Añadir nuevo nivel */}
+  <div style={{ marginTop: '10px' }}>
+    <input
+      type="number"
+      placeholder="Nivel"
+      value={nuevoNivel}
+      onChange={(e) => setNuevoNivel(e.target.value)}
+      style={{ width: '50px', marginRight: '5px' }}
+    />
+    <input
+      type="number"
+      placeholder="XP requerida"
+      value={nuevoXP}
+      onChange={(e) => setNuevoXP(e.target.value)}
+      style={{ width: '60px', marginRight: '5px' }}
+    />
+    <button onClick={() => {
+      if (!nuevoNivel || !nuevoXP) return;
+      actualizarNivel(nuevoNivel, nuevoXP);
+      setNuevoNivel('');
+      setNuevoXP('');
+    }}>➕ Añadir</button>
+  </div>
+</div>
 
       {/* MODAL DE CONFIGURACIÓN DE STREAM */}
       {mostrarConfigStream && (
