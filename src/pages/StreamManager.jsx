@@ -116,6 +116,16 @@ function StreamManager() {
       categoria: 'Juegos',
       etiquetas: ''
     });
+        if (nuevoNivel > (usuario.nivelStreamer || 0)) {
+      const alerta = document.createElement('div');
+      alerta.className = 'alerta-nivel-flotante';
+      alerta.innerText = `🎉 ¡Subiste al nivel ${nuevoNivel}!`;
+      document.body.appendChild(alerta);
+
+      setTimeout(() => {
+        document.body.removeChild(alerta);
+      }, 4000);
+    }
   };
 
   const irAlDashboard = () => {
