@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { io } from 'socket.io-client'; // 1. IMPORTAR SOCKET
+import { io } from 'socket.io-client';
 import './StreamManager.css';
 
 function StreamManager() {
@@ -8,7 +8,7 @@ function StreamManager() {
   const navigate = useNavigate();
   const chatRef = useRef(null);
   const eventListRef = useRef(null);
-  const [socket, setSocket] = useState(null); // 2. ESTADO DEL SOCKET
+  const [socket, setSocket] = useState(null);
 
   // Estados de la transmisión
   const [enVivo, setEnVivo] = useState(false);
@@ -62,26 +62,22 @@ function StreamManager() {
     if (eventListRef.current) eventListRef.current.scrollTop = 0; 
   }, [historialEventos]);
   
-  // ---------------------------------------------------------
   // 3. LÓGICA HÍBRIDA: BOTS + SOCKET REAL
-  // ---------------------------------------------------------
+
   useEffect(() => {
     if (!enVivo) return;
 
-    // A) CONEXIÓN REAL (SOCKET.IO)
-    // A) CONEXIÓN REAL (SOCKET.IO)
     const nuevoSocket = io('http://localhost:3000');
     setSocket(nuevoSocket);
     
     const streamId = "sala_general"; 
     nuevoSocket.emit('unirse_stream', streamId);
 
-    // --- NUEVO: AVISAR QUE ESTOY EN VIVO ---
     nuevoSocket.emit('iniciar_transmision', {
         id: streamId,
         titulo: configStream.titulo || "Transmisión en Vivo",
         streamer: usuario.nombre,
-        img: "https://picsum.photos/300/200?grayscale" // Imagen de portada
+        img: "https://picsum.photos/300/200?grayscale"
     });
 
     // Escuchar mensajes de humanos
@@ -91,7 +87,6 @@ function StreamManager() {
 
     // Escuchar regalos de humanos (Para alertas)
     nuevoSocket.on('evento_regalo', (data) => {
-         // data = { alertaId, user, regalo, emoji }
          setRegalosCola(prev => [...prev, data]);
          
          const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -107,7 +102,7 @@ function StreamManager() {
          setTimeout(() => setRegalosCola(prev => prev.filter(a => a.alertaId !== data.alertaId)), 4000);
     });
 
-    // B) SIMULACIÓN DE BOTS (Se mantiene para rellenar)
+    // B) SIMULACIÓN DE BOTS
     const loopBots = setInterval(() => {
       const rand = Math.random();
       // Solo bots chat (30% prob)
@@ -117,7 +112,6 @@ function StreamManager() {
         const randomColor = Math.random() > 0.5 ? '#00ffcc' : '#bbb';
         const randomLevel = Math.floor(Math.random() * 50) + 1;
         
-        // Usamos la misma estructura de mensaje
         const mensajeBot = { 
             id: Date.now() + Math.random(), 
             autor: users[Math.floor(Math.random() * users.length)], 
@@ -128,9 +122,8 @@ function StreamManager() {
         };
         setMensajes(prev => [...prev.slice(-19), mensajeBot]);
       }
-      // Bots enviando regalos (15% prob) - Opcional
+      // Bots enviando regalos (15% prob)
       else if (rand > 0.85 && (usuario.regalos && usuario.regalos.length > 0)) {
-         // ... Puedes dejar la simulación de regalos de bots si quieres, o quitarla para ver solo reales
       }
     }, 2000); 
 
@@ -139,7 +132,6 @@ function StreamManager() {
         nuevoSocket.disconnect();
     };
   }, [enVivo, usuario.regalos]);
-  // ---------------------------------------------------------
 
   // INICIAR STREAM CON CONFIGURACIÓN 
   const iniciarStream = () => {
@@ -153,12 +145,10 @@ function StreamManager() {
 
   // --- FINALIZAR STREAM ---
   const finalizarStream = () => {
-    // --- NUEVO: AVISAR QUE TERMINÉ ---
     if (socket) {
         socket.emit('detener_transmision', "sala_general");
         socket.disconnect(); // Desconectar socket manualmente al parar
     }
-    // --------------------------------
 
     setEnVivo(false);
     

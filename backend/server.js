@@ -9,7 +9,6 @@ require('dotenv').config();
 const app = express();
 const server = http.createServer(app);
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -147,7 +146,7 @@ app.post('/api/register', async (req, res) => {
   try {
     const { nombre, email, password, fechaNacimiento } = req.body;
 
-    // Validaciones de existencia...
+    // Validaciones de existencia
     const existeEmail = await db.Usuario.findOne({ where: { email } });
     if (existeEmail) return res.status(400).json({ error: "El email ya existe" });
     const existeNombre = await db.Usuario.findOne({ where: { nombre } });
@@ -159,14 +158,13 @@ app.post('/api/register', async (req, res) => {
       nombre,
       email,
       password: hashedPassword,
-      rol: 'espectador', // POR DEFECTO
+      rol: 'espectador',
       saldo: 500,
       nivel: 1,
       puntos: 0,
       avatarUrl: "https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
     });
 
-    // Devolvemos 'monedas' en lugar de 'saldo' para el frontend
     res.json({ mensaje: "Usuario creado", usuario: { ...nuevoUsuario.dataValues, monedas: nuevoUsuario.saldo } });
 
   } catch (error) {
@@ -194,7 +192,6 @@ app.post('/api/login', async (req, res) => {
     if (rolElegido) {
         await usuario.update({ rol: rolElegido });
     }
-    // ----------------------------------------------------
 
     res.json({
       mensaje: "Login exitoso",
@@ -246,8 +243,8 @@ app.post('/api/comprar-monedas', async (req, res) => {
 app.get('/api/historial/:usuarioId', async (req, res) => {
   try {
     const { usuarioId } = req.params;
-    const { tipo } = req.query; // Permite filtrar por ?tipo=recarga o ?tipo=regalo
-
+    const { tipo } = req.query;
+    
     // Construimos el filtro (WHERE)
     let filtro = { usuarioOrigenId: usuarioId };
     

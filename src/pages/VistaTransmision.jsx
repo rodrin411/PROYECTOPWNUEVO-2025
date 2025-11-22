@@ -8,8 +8,8 @@ function VistaTransmision() {
   const ubicacion = useLocation();
   const referenciaChat = useRef(null);
   const navigate = useNavigate();
-  const [socket, setSocket] = useState(null); // Estado para guardar la conexión
-
+  const [socket, setSocket] = useState(null);
+  
   const datosTransmision = ubicacion.state || {
     titulo: "Transmisión Desconocida",
     streamer: "Usuario",
@@ -105,7 +105,6 @@ function VistaTransmision() {
     return () => clearInterval(loop);
   }, []);
 
-  // Scroll automático
   useEffect(() => {
     if(referenciaChat.current) {
       referenciaChat.current.scrollTop = referenciaChat.current.scrollHeight;

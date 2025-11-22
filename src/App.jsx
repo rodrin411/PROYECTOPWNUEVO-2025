@@ -14,7 +14,6 @@ import "./App.css";
 import { io } from 'socket.io-client';
 
 
-// Componente Home
 function Home() {
   const navigate = useNavigate();
   
@@ -25,8 +24,14 @@ function Home() {
   const streamsFalsos = [
     { id: 1, titulo: "Jugando Fortnite", streamer: "GamerPro", img: "https://picsum.photos/300/200?random=1" },
     { id: 2, titulo: "Música en vivo 🎸", streamer: "RockLive", img: "https://picsum.photos/300/200?random=2" },
-    // ... tus otros streams falsos ...
+    { id: 3, titulo: "Programando un juego en Unity", streamer: "DevMaster", img: "https://picsum.photos/300/200?random=3" },
+    { id: 4, titulo: "Cocinando recetas fáciles 🍳", streamer: "ChefLoco", img: "https://picsum.photos/300/200?random=4" },
+    { id: 5, titulo: "Charla sobre cine 🎬", streamer: "CinemaTalks", img: "https://picsum.photos/300/200?random=5" },
+    { id: 6, titulo: "Retos en Minecraft 🔥", streamer: "BlockHero", img: "https://picsum.photos/300/200?random=6" },
   ];
+
+  const sidebarStreamers = ["GamerPro", "RockLive", "DevMaster", "ChefLoco", "CinemaTalks", "BlockHero"];
+
 
   // 3. Conectarse para escuchar si hay alguien en vivo
   useEffect(() => {
@@ -46,7 +51,12 @@ function Home() {
   return (
     <div className="principal-container">
       <aside className="sidebar">
-        {/* ... tu sidebar ... */}
+        <h3 style={{color: '#00ffcc'}}>Canales</h3>
+        <ul>
+          {sidebarStreamers.map((s, index) => (
+            <li key={index}>{s}</li>
+          ))}
+        </ul>
       </aside>
 
       <section className="streams-section">
