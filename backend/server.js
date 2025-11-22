@@ -94,14 +94,23 @@ io.on('connection', (socket) => {
   socket.on('enviar_regalo', async (data) => {
     try {
       const usuario = await db.Usuario.findByPk(data.usuarioId);
+      
+      // Verificamos saldo
       if (usuario && usuario.saldo >= data.regalo.costo) {
+
         const nuevoSaldo = parseFloat(usuario.saldo) - data.regalo.costo;
         const nuevosPuntos = usuario.puntos + data.regalo.xp;
         const nuevoNivel = calcularNuevoNivel(nuevosPuntos, usuario.nivel);
 
         await usuario.update({ saldo: nuevoSaldo, puntos: nuevosPuntos, nivel: nuevoNivel });
 
-        // 1. Notificar al chat público
+        // GUARDAR EN HISTORIAL
+        const transaccion = await db.Transaccion.create({
+            usuarioOrigenId: usuario.id,
+            tipo: 'regalo',
+            monto: data.regalo.costo
+        });
+        // Notificar al chat público
         io.to(data.streamId).emit('recibir_mensaje', {
           id: Date.now(),
           autor: usuario.nombre,
@@ -111,7 +120,7 @@ io.on('connection', (socket) => {
           colorAutor: '#a855f7'
         });
 
-        // 2. Notificar al Streamer (para alertas/overlay)
+        // Notificar al Streamer
         io.to(data.streamId).emit('evento_regalo', {
             alertaId: Date.now(),
             user: usuario.nombre,
@@ -119,11 +128,13 @@ io.on('connection', (socket) => {
             emoji: data.regalo.emoji
         });
 
-        // 3. Actualizar saldo del cliente específico
+        // Actualizar cliente
         socket.emit('actualizar_saldo', { nuevoSaldo, nuevoNivel, nuevosPuntos });
+      } else {
+        console.log("❌ Saldo insuficiente o usuario no encontrado"); // <--- LOG 4
       }
     } catch (error) {
-      console.error("Error socket regalo:", error);
+      console.error("❌ Error CRÍTICO socket regalo:", error); // <--- LOG ERROR
     }
   });
 });
@@ -228,6 +239,33 @@ app.post('/api/comprar-monedas', async (req, res) => {
   } catch (error) {
     console.error("❌ Error compra:", error);
     res.status(500).json({ error: "Error en la compra" });
+  }
+});
+
+// 4. CONSULTA: OBTENER HISTORIAL DE TRANSACCIONES
+app.get('/api/historial/:usuarioId', async (req, res) => {
+  try {
+    const { usuarioId } = req.params;
+    const { tipo } = req.query; // Permite filtrar por ?tipo=recarga o ?tipo=regalo
+
+    // Construimos el filtro (WHERE)
+    let filtro = { usuarioOrigenId: usuarioId };
+    
+    // Si el frontend manda un tipo específico, lo agregamos al filtro
+    if (tipo) {
+        filtro.tipo = tipo;
+    }
+
+    const historial = await db.Transaccion.findAll({
+      where: filtro,
+      order: [['createdAt', 'DESC']] // Ordenar: lo más reciente primero
+    });
+
+    res.json(historial);
+
+  } catch (error) {
+    console.error("Error obteniendo historial:", error);
+    res.status(500).json({ error: "Error al obtener historial" });
   }
 });
 
