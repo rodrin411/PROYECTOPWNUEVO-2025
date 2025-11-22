@@ -1,5 +1,7 @@
 'use strict';
-
+import express from "express";
+import cors from "cors";
+import streamerChannelRoutes from "./routes/streamerChannel.routes.js";
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
@@ -8,6 +10,13 @@ const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
 const config = require(__dirname + '/../config/config.js')[env];
 const db = {};
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+app.use("/api/streamer-channels", streamerChannelRoutes);
+
+app.listen(3000, () => console.log("Servidor corriendo en puerto 3000"));
 
 let sequelize;
 if (config.use_env_variable) {

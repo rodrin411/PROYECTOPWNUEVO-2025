@@ -4,6 +4,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const bcrypt = require('bcrypt');
 const db = require('./models');
+const channelsRoutes = require('./routes/channels');
 require('dotenv').config();
 
 const app = express();
@@ -12,6 +13,7 @@ const server = http.createServer(app);
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/api/channels', channelsRoutes);
 
 // --- VARIABLES GLOBALES (RAM) ---
 // Aquí guardamos quién está transmitiendo en vivo para avisar al Home
