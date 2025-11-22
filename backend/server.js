@@ -13,6 +13,10 @@ const server = http.createServer(app);
 app.use(cors());
 app.use(express.json());
 
+// --- VARIABLES GLOBALES (RAM) ---
+// Aquí guardamos quién está transmitiendo en vivo para avisar al Home
+let streamsActivos = []; 
+
 // --- LÓGICA DE MATEMÁTICA (NIVELES) ---
 const calcularTechoNivel = (n) => (10 * n * (n + 1)) / 2;
 
@@ -24,7 +28,7 @@ const calcularNuevoNivel = (puntosActuales, nivelActual) => {
   return nuevoNivel;
 };
 
-// --- SOCKET.IO (CHAT Y REGALOS) ---
+// --- SOCKET.IO (CHAT, REGALOS Y ESTADO DE STREAMS) ---
 const io = new Server(server, {
   cors: { origin: "http://localhost:5173" }
 });
@@ -32,9 +36,36 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log('🔌 Cliente conectado al socket:', socket.id);
 
+  // 1. Al conectarse alguien, le enviamos la lista actual de streams
+  socket.emit('lista_streams', streamsActivos);
+
+  // 2. Unirse a una sala específica
   socket.on('unirse_stream', (streamId) => {
     socket.join(streamId);
   });
+
+  // --- GESTIÓN DE STREAMS EN VIVO (NUEVO) ---
+  
+  // A) Streamer avisa que empezó
+  socket.on('iniciar_transmision', (datosStream) => {
+    // Evitar duplicados por si acaso
+    streamsActivos = streamsActivos.filter(s => s.id !== datosStream.id);
+    streamsActivos.push(datosStream);
+    
+    // Avisar a TODOS (Home) que actualicen su lista
+    io.emit('lista_streams', streamsActivos);
+    console.log("🔴 Nuevo Stream en vivo:", datosStream.titulo);
+  });
+
+  // B) Streamer avisa que terminó
+  socket.on('detener_transmision', (streamId) => {
+    streamsActivos = streamsActivos.filter(s => s.id !== streamId);
+    // Avisar a todos que se apagó
+    io.emit('lista_streams', streamsActivos);
+    console.log("⚫ Stream finalizado:", streamId);
+  });
+
+  // --- CHAT Y COMUNIDAD ---
 
   // CHAT
   socket.on('enviar_mensaje', async (data) => {
@@ -70,7 +101,7 @@ io.on('connection', (socket) => {
 
         await usuario.update({ saldo: nuevoSaldo, puntos: nuevosPuntos, nivel: nuevoNivel });
 
-        // Notificar al chat
+        // 1. Notificar al chat público
         io.to(data.streamId).emit('recibir_mensaje', {
           id: Date.now(),
           autor: usuario.nombre,
@@ -80,7 +111,15 @@ io.on('connection', (socket) => {
           colorAutor: '#a855f7'
         });
 
-        // Actualizar cliente específico
+        // 2. Notificar al Streamer (para alertas/overlay)
+        io.to(data.streamId).emit('evento_regalo', {
+            alertaId: Date.now(),
+            user: usuario.nombre,
+            regalo: data.regalo.nombre,
+            emoji: data.regalo.emoji
+        });
+
+        // 3. Actualizar saldo del cliente específico
         socket.emit('actualizar_saldo', { nuevoSaldo, nuevoNivel, nuevosPuntos });
       }
     } catch (error) {
@@ -91,11 +130,11 @@ io.on('connection', (socket) => {
 
 // --- RUTAS API (ENDPOINTS) ---
 
-// 1. REGISTRO 
+// 1. REGISTRO (Sin Rol, por defecto espectador)
 app.post('/api/register', async (req, res) => {
   console.log("📥 Petición de Registro:", req.body.email);
   try {
-    const { nombre, email, password, fechaNacimiento } = req.body; // SIN ROL
+    const { nombre, email, password, fechaNacimiento } = req.body;
 
     // Validaciones de existencia...
     const existeEmail = await db.Usuario.findOne({ where: { email } });
@@ -116,6 +155,7 @@ app.post('/api/register', async (req, res) => {
       avatarUrl: "https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
     });
 
+    // Devolvemos 'monedas' en lugar de 'saldo' para el frontend
     res.json({ mensaje: "Usuario creado", usuario: { ...nuevoUsuario.dataValues, monedas: nuevoUsuario.saldo } });
 
   } catch (error) {
@@ -124,7 +164,7 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// 2. LOGIN
+// 2. LOGIN (Con cambio de Rol Dinámico)
 app.post('/api/login', async (req, res) => {
   console.log("📥 Petición de Login:", req.body.email);
   try {
@@ -139,11 +179,11 @@ app.post('/api/login', async (req, res) => {
     const validPassword = await bcrypt.compare(password, usuario.password);
     if (!validPassword) return res.status(401).json({ error: "Contraseña incorrecta" });
 
-    // --- TRUCO: ACTUALIZAMOS EL ROL AL QUE ELIGIÓ EL USUARIO ---
+    // --- ACTUALIZAMOS EL ROL AL QUE ELIGIÓ EL USUARIO ---
     if (rolElegido) {
         await usuario.update({ rol: rolElegido });
     }
-    // ------------------------------------------------------------
+    // ----------------------------------------------------
 
     res.json({
       mensaje: "Login exitoso",
@@ -191,7 +231,7 @@ app.post('/api/comprar-monedas', async (req, res) => {
   }
 });
 
-// INICIAR
+// INICIAR SERVIDOR
 db.sequelize.sync().then(() => {
   const PORT = process.env.PORT || 3000;
   server.listen(PORT, () => {

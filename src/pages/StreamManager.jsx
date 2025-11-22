@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
+import { io } from 'socket.io-client'; // 1. IMPORTAR SOCKET
 import './StreamManager.css';
 
 function StreamManager() {
@@ -7,6 +8,7 @@ function StreamManager() {
   const navigate = useNavigate();
   const chatRef = useRef(null);
   const eventListRef = useRef(null);
+  const [socket, setSocket] = useState(null); // 2. ESTADO DEL SOCKET
 
   // Estados de la transmisión
   const [enVivo, setEnVivo] = useState(false);
@@ -60,41 +62,86 @@ function StreamManager() {
     if (eventListRef.current) eventListRef.current.scrollTop = 0; 
   }, [historialEventos]);
   
+  // ---------------------------------------------------------
+  // 3. LÓGICA HÍBRIDA: BOTS + SOCKET REAL
+  // ---------------------------------------------------------
   useEffect(() => {
     if (!enVivo) return;
-    const regalosDisponibles = usuario.regalos || []; 
-    const loop = setInterval(() => {
+
+    // A) CONEXIÓN REAL (SOCKET.IO)
+    // A) CONEXIÓN REAL (SOCKET.IO)
+    const nuevoSocket = io('http://localhost:3000');
+    setSocket(nuevoSocket);
+    
+    const streamId = "sala_general"; 
+    nuevoSocket.emit('unirse_stream', streamId);
+
+    // --- NUEVO: AVISAR QUE ESTOY EN VIVO ---
+    nuevoSocket.emit('iniciar_transmision', {
+        id: streamId,
+        titulo: configStream.titulo || "Transmisión en Vivo",
+        streamer: usuario.nombre,
+        img: "https://picsum.photos/300/200?grayscale" // Imagen de portada
+    });
+
+    // Escuchar mensajes de humanos
+    nuevoSocket.on('recibir_mensaje', (msj) => {
+        setMensajes(prev => [...prev.slice(-19), msj]);
+    });
+
+    // Escuchar regalos de humanos (Para alertas)
+    nuevoSocket.on('evento_regalo', (data) => {
+         // data = { alertaId, user, regalo, emoji }
+         setRegalosCola(prev => [...prev, data]);
+         
+         const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+         setHistorialEventos(prev => [{ 
+            id: data.alertaId, 
+            tipo: 'regalo', 
+            user: data.user, 
+            regalo: data.regalo, 
+            emoji: data.emoji, 
+            hora: timestamp 
+         }, ...prev]);
+
+         setTimeout(() => setRegalosCola(prev => prev.filter(a => a.alertaId !== data.alertaId)), 4000);
+    });
+
+    // B) SIMULACIÓN DE BOTS (Se mantiene para rellenar)
+    const loopBots = setInterval(() => {
       const rand = Math.random();
+      // Solo bots chat (30% prob)
       if (rand < 0.3) {
         const users = ["Viewer1", "GamerPro", "Fan_Kick", "Troll99"];
         const texts = ["Hola!", "GG", "Que pro", "Juega otra cosa", "Saludame!"];
         const randomColor = Math.random() > 0.5 ? '#00ffcc' : '#bbb';
         const randomLevel = Math.floor(Math.random() * 50) + 1;
-        agregarMensaje(users[Math.floor(Math.random() * users.length)], texts[Math.floor(Math.random() * texts.length)], false, randomColor, randomLevel);
-      } else if (rand > 0.85 && regalosDisponibles.length > 0) {
-        const regalo = regalosDisponibles[Math.floor(Math.random() * regalosDisponibles.length)];
-        enviarRegaloSimulado(regalo);
+        
+        // Usamos la misma estructura de mensaje
+        const mensajeBot = { 
+            id: Date.now() + Math.random(), 
+            autor: users[Math.floor(Math.random() * users.length)], 
+            texto: texts[Math.floor(Math.random() * texts.length)], 
+            esRegalo: false, 
+            colorAutor: randomColor, 
+            nivel: randomLevel 
+        };
+        setMensajes(prev => [...prev.slice(-19), mensajeBot]);
+      }
+      // Bots enviando regalos (15% prob) - Opcional
+      else if (rand > 0.85 && (usuario.regalos && usuario.regalos.length > 0)) {
+         // ... Puedes dejar la simulación de regalos de bots si quieres, o quitarla para ver solo reales
       }
     }, 2000); 
-    return () => clearInterval(loop);
+
+    return () => {
+        clearInterval(loopBots);
+        nuevoSocket.disconnect();
+    };
   }, [enVivo, usuario.regalos]);
+  // ---------------------------------------------------------
 
-  const agregarMensaje = (autor, texto, esRegalo = false, colorAutor = '#bbb', nivel = 1) => {
-    setMensajes(prev => [...prev.slice(-19), { id: Date.now(), autor, texto, esRegalo, colorAutor, nivel }]);
-  };
-
-  const enviarRegaloSimulado = (regalo) => {
-    const user = "FanMisterioso";
-    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const randomLevel = Math.floor(Math.random() * 99) + 1;
-    agregarMensaje(user, `ha enviado ${regalo.nombre} ${regalo.emoji}`, true, '#a855f7', randomLevel);
-    const alertaId = Date.now();
-    setRegalosCola(prev => [...prev, { ...regalo, user, alertaId }]);
-    setHistorialEventos(prev => [{ id: alertaId, tipo: 'regalo', user, regalo: regalo.nombre, emoji: regalo.emoji, hora: timestamp }, ...prev]);
-    setTimeout(() => setRegalosCola(prev => prev.filter(a => a.alertaId !== alertaId)), 4000);
-  };
-
-  //  INICIAR STREAM CON CONFIGURACIÓN 
+  // INICIAR STREAM CON CONFIGURACIÓN 
   const iniciarStream = () => {
     if (!configStream.titulo.trim()) {
       alert('Por favor ingresa un título para tu stream');
@@ -106,6 +153,13 @@ function StreamManager() {
 
   // --- FINALIZAR STREAM ---
   const finalizarStream = () => {
+    // --- NUEVO: AVISAR QUE TERMINÉ ---
+    if (socket) {
+        socket.emit('detener_transmision', "sala_general");
+        socket.disconnect(); // Desconectar socket manualmente al parar
+    }
+    // --------------------------------
+
     setEnVivo(false);
     
     const horasGanadas = Math.ceil(tiempo / 10); 
@@ -228,7 +282,7 @@ function StreamManager() {
             {mensajes.map(m => (
               <div key={m.id} className={`chat-line ${m.esRegalo ? 'highlight' : ''}`}>
                 <span className="insignia-nivel">{m.nivel || 1}</span>
-                <span className="chat-user" style={{ color: m.colorAutor }}>{m.autor}:</span>
+                <span className="chat-user" style={{ color: m.colorAutor || (m.esRegalo ? '#a855f7' : '#bbb') }}>{m.autor}:</span>
                 <span className="chat-text">{m.texto}</span>
               </div>
             ))}
@@ -237,53 +291,53 @@ function StreamManager() {
       </div>
 
       {/* CONFIGURAR PUNTOS POR NIVEL */}
-<div className="config-puntos-nivel">
-  <h3>Configurar puntos requeridos por nivel</h3>
+      <div className="config-puntos-nivel">
+        <h3>Configurar puntos requeridos por nivel</h3>
 
-  {/* Lista de niveles existentes */}
-  {Object.entries(puntosPorNivel).map(([nivel, puntos]) => (
-    <div key={nivel} style={{ marginBottom: '5px' }}>
-      <input
-        type="number"
-        value={nivel}
-        disabled
-        style={{ width: '50px', marginRight: '5px' }}
-      />
-      <input
-        type="number"
-        value={puntos}
-        min={0}
-        onChange={(e) => actualizarNivel(nivel, e.target.value)}
-        style={{ width: '60px', marginRight: '5px' }}
-      /> puntos
-      <button onClick={() => eliminarNivel(nivel)}>❌</button>
-    </div>
-  ))}
+        {/* Lista de niveles existentes */}
+        {Object.entries(puntosPorNivel).map(([nivel, puntos]) => (
+          <div key={nivel} style={{ marginBottom: '5px' }}>
+            <input
+              type="number"
+              value={nivel}
+              disabled
+              style={{ width: '50px', marginRight: '5px' }}
+            />
+            <input
+              type="number"
+              value={puntos}
+              min={0}
+              onChange={(e) => actualizarNivel(nivel, e.target.value)}
+              style={{ width: '60px', marginRight: '5px' }}
+            /> puntos
+            <button onClick={() => eliminarNivel(nivel)}>❌</button>
+          </div>
+        ))}
 
-  {/* Añadir nuevo nivel */}
-  <div style={{ marginTop: '10px' }}>
-    <input
-      type="number"
-      placeholder="Nivel"
-      value={nuevoNivel}
-      onChange={(e) => setNuevoNivel(e.target.value)}
-      style={{ width: '50px', marginRight: '5px' }}
-    />
-    <input
-      type="number"
-      placeholder="XP requerida"
-      value={nuevoXP}
-      onChange={(e) => setNuevoXP(e.target.value)}
-      style={{ width: '60px', marginRight: '5px' }}
-    />
-    <button onClick={() => {
-      if (!nuevoNivel || !nuevoXP) return;
-      actualizarNivel(nuevoNivel, nuevoXP);
-      setNuevoNivel('');
-      setNuevoXP('');
-    }}>➕ Añadir</button>
-  </div>
-</div>
+        {/* Añadir nuevo nivel */}
+        <div style={{ marginTop: '10px' }}>
+          <input
+            type="number"
+            placeholder="Nivel"
+            value={nuevoNivel}
+            onChange={(e) => setNuevoNivel(e.target.value)}
+            style={{ width: '50px', marginRight: '5px' }}
+          />
+          <input
+            type="number"
+            placeholder="XP requerida"
+            value={nuevoXP}
+            onChange={(e) => setNuevoXP(e.target.value)}
+            style={{ width: '60px', marginRight: '5px' }}
+          />
+          <button onClick={() => {
+            if (!nuevoNivel || !nuevoXP) return;
+            actualizarNivel(nuevoNivel, nuevoXP);
+            setNuevoNivel('');
+            setNuevoXP('');
+          }}>➕ Añadir</button>
+        </div>
+      </div>
 
       {/* MODAL DE CONFIGURACIÓN DE STREAM */}
       {mostrarConfigStream && (

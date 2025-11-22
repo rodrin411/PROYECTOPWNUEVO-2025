@@ -26,3 +26,5 @@ backend/.env
 *.njsproj
 *.sln
 *.sw?
+#para correr (2 CMD): 1. Backend (cd backend, node server.js), 2. Frontend (npm run dev)
+#instalar: npm install socket.io-client
